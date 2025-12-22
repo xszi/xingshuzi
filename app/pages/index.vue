@@ -1,53 +1,48 @@
 <template>
   <div class="home-page">
+    <!-- Hero Section -->
     <div class="hero-section">
-      <h2 class="hero-title">欢迎来到星数字</h2>
-      <p class="hero-description">这是一个基于 Nuxt 的服务端渲染 PC 端应用</p>
+      <h1 class="hero-title">行书子 - 资源分享平台</h1>
+      <p class="hero-description">提供编程课程、音乐课程、音乐专辑、各类书籍、助农产品等优质资源</p>
     </div>
-    
-    <div class="features-section">
-      <h3 class="section-title">特性</h3>
-      <div class="features-grid">
-        <div class="feature-card">
-          <h4>服务端渲染 (SSR)</h4>
-          <p>基于 Nuxt 的服务端渲染，提供更好的 SEO 和首屏加载性能</p>
-        </div>
-        <div class="feature-card">
-          <h4>TypeScript 支持</h4>
-          <p>完整的 TypeScript 支持，提供类型安全和更好的开发体验</p>
-        </div>
-        <div class="feature-card">
-          <h4>现代化 UI</h4>
-          <p>响应式设计，适配 PC 端，提供流畅的用户体验</p>
-        </div>
+
+    <!-- Categories Section -->
+    <div class="categories-section">
+      <h2 class="section-title">资源分类</h2>
+      <div class="categories-grid">
+        <CategoryCard 
+          v-for="category in categories" 
+          :key="category.id" 
+          :category="category" 
+        />
       </div>
     </div>
-    
-    <div class="info-section">
-      <h3 class="section-title">项目信息</h3>
-      <div class="info-card">
-        <p><strong>框架:</strong> Nuxt 4</p>
-        <p><strong>渲染模式:</strong> 服务端渲染 (SSR)</p>
-        <p><strong>目标平台:</strong> PC 端</p>
-        <p><strong>当前时间:</strong> {{ currentTime }}</p>
+
+    <!-- Featured Resources -->
+    <div class="featured-section">
+      <h2 class="section-title">精选推荐</h2>
+      <div class="resources-grid">
+        <ResourceCard 
+          v-for="resource in featuredResources" 
+          :key="resource.id" 
+          :resource="resource" 
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// 服务端和客户端都会执行
-const currentTime = ref(new Date().toLocaleString('zh-CN'))
+import { categories } from '~/data/categories'
+import { sampleResources } from '~/data/resources'
 
-// 在客户端每秒钟更新一次时间
-onMounted(() => {
-  const timer = setInterval(() => {
-    currentTime.value = new Date().toLocaleString('zh-CN')
-  }, 1000)
-  
-  onUnmounted(() => {
-    clearInterval(timer)
+// 获取精选资源（从各个分类中取前2个）
+const featuredResources = computed(() => {
+  const featured: any[] = []
+  Object.values(sampleResources).forEach(resources => {
+    featured.push(...resources.slice(0, 2))
   })
+  return featured.slice(0, 6) // 最多显示6个
 })
 </script>
 
@@ -69,81 +64,67 @@ onMounted(() => {
 
 .hero-section {
   text-align: center;
-  padding: 4rem 0;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 12px;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
   margin-bottom: 3rem;
+  color: white;
 }
 
 .hero-title {
   font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 1rem;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
+  color: white;
 }
 
 .hero-description {
   font-size: 1.2rem;
-  color: #666;
-}
-
-.features-section,
-.info-section {
-  margin-bottom: 3rem;
-}
-
-.section-title {
-  font-size: 1.8rem;
-  color: #333;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #667eea;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.feature-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.feature-card h4 {
-  color: #667eea;
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
-}
-
-.feature-card p {
-  color: #666;
+  margin: 0;
+  opacity: 0.95;
   line-height: 1.6;
 }
 
-.info-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+.categories-section,
+.featured-section {
+  margin-bottom: 4rem;
 }
 
-.info-card p {
-  margin: 0.8rem 0;
+.section-title {
+  font-size: 2rem;
+  font-weight: bold;
   color: #333;
-  font-size: 1.1rem;
+  margin: 0 0 2rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid #667eea;
 }
 
-.info-card strong {
-  color: #667eea;
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-description {
+    font-size: 1rem;
+  }
+  
+  .categories-grid,
+  .resources-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
+
 

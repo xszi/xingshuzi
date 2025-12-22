@@ -1,4 +1,4 @@
-# 星数字 (XingShuZi)
+# 行书子 (XingShuZi)
 
 一个基于 Nuxt 4 的服务端渲染 (SSR) PC 端应用项目。
 

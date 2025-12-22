@@ -2,10 +2,14 @@
   <div class="layout-container">
     <header class="header">
       <div class="header-content">
-        <h1 class="logo">星数字</h1>
+        <h1 class="logo">行书子</h1>
         <nav class="nav">
           <NuxtLink to="/" class="nav-link">首页</NuxtLink>
-          <NuxtLink to="/about" class="nav-link">关于</NuxtLink>
+          <NuxtLink to="/programming-course" class="nav-link">编程课程</NuxtLink>
+          <NuxtLink to="/music-course" class="nav-link">音乐课程</NuxtLink>
+          <NuxtLink to="/music-album" class="nav-link">音乐专辑</NuxtLink>
+          <NuxtLink to="/books" class="nav-link">各类书籍</NuxtLink>
+          <NuxtLink to="/agricultural-product" class="nav-link">助农产品</NuxtLink>
         </nav>
       </div>
     </header>
@@ -16,7 +20,7 @@
     
     <footer class="footer">
       <div class="footer-content">
-        <p>&copy; 2025 星数字. All rights reserved.</p>
+        <p>&copy; 2025 行书子. All rights reserved.</p>
       </div>
     </footer>
   </div>
@@ -53,7 +57,8 @@
 
 .nav {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .nav-link {
@@ -93,4 +98,5 @@
   color: #666;
 }
 </style>
+
 

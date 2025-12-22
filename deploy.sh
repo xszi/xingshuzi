@@ -4,7 +4,7 @@
 
 set -e
 
-echo "🚀 开始部署星数字项目..."
+echo "🚀 开始部署行书子项目..."
 
 # 颜色输出
 GREEN='\033[0;32m'
@@ -61,4 +61,5 @@ else
     echo -e "${YELLOW}💡 建议安装 PM2: npm install -g pm2${NC}"
     npm run start
 fi
+
 

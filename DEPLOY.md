@@ -1,6 +1,6 @@
 # 服务器部署指南
 
-本文档介绍如何将星数字项目部署到生产服务器。
+本文档介绍如何将行书子项目部署到生产服务器。
 
 ## 目录
 
@@ -382,4 +382,5 @@ sudo netstat -tulpn | grep 3000
 - [PM2 文档](https://pm2.keymetrics.io/docs/usage/quick-start/)
 - [Nginx 文档](https://nginx.org/en/docs/)
 - [Docker 文档](https://docs.docker.com/)
+
 
