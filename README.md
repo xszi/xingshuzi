@@ -5,6 +5,7 @@
 ## 项目特性
 
 - ✅ **服务端渲染 (SSR)** - 基于 Nuxt 的服务端渲染，提供更好的 SEO 和首屏加载性能
+- ✅ **SEO 优化** - 完整的 SEO 优化，包括 Meta 标签、结构化数据、Sitemap 等
 - ✅ **TypeScript 支持** - 完整的 TypeScript 支持，提供类型安全
 - ✅ **现代化 UI** - 响应式设计，适配 PC 端
 - ✅ **开发工具** - 集成 Nuxt DevTools，提升开发体验
@@ -137,4 +138,5 @@ node .output/server/index.mjs
 ### 相关资源
 
 - [详细部署指南](./DEPLOY.md)
+- [SEO 优化说明](./SEO.md)
 - [Nuxt 部署文档](https://nuxt.com/docs/getting-started/deployment)

@@ -26,19 +26,43 @@
 
 <script setup lang="ts">
 import { sampleResources } from '~/data/resources'
+import { generateItemListSchema, generateCourseSchema } from '~/utils/structuredData'
+
+const config = useRuntimeConfig()
+const siteUrl = config.public.siteUrl || 'https://xingshuzi.com'
 
 const resources = computed(() => {
   return sampleResources['programming-course'] || []
 })
 
-useHead({
-  title: '编程课程 - 行书子',
-  meta: [
-    {
-      name: 'description',
-      content: '优质的编程学习课程，涵盖前端、后端、移动开发等'
-    }
+// 生成结构化数据
+const structuredData = computed(() => {
+  const courseList = resources.value.map((resource, index) => ({
+    name: resource.title,
+    description: resource.description,
+    url: `${siteUrl}/programming-course#${resource.id}`
+  }))
+  
+  return [
+    generateItemListSchema(courseList),
+    ...resources.value.map(resource => 
+      generateCourseSchema({
+        name: resource.title,
+        description: resource.description,
+        url: `${siteUrl}/programming-course#${resource.id}`,
+        provider: resource.author,
+        price: resource.price
+      })
+    )
   ]
+})
+
+useSEO({
+  title: '编程课程',
+  description: '优质的编程学习课程，涵盖前端、后端、移动开发等。Vue.js、Node.js、TypeScript 等热门技术课程。',
+  keywords: '编程课程,前端开发,后端开发,JavaScript,Vue,Node.js,TypeScript,在线学习,编程教程',
+  url: `${siteUrl}/programming-course`,
+  structuredData: structuredData.value
 })
 </script>
 

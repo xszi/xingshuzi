@@ -44,6 +44,37 @@ const featuredResources = computed(() => {
   })
   return featured.slice(0, 6) // 最多显示6个
 })
+
+// SEO 优化
+const config = useRuntimeConfig()
+const siteUrl = config.public.siteUrl || 'https://xingshuzi.com'
+
+useSEO({
+  title: '行书子 - 资源分享平台',
+  description: '提供编程课程、音乐课程、音乐专辑、各类书籍、助农产品等优质资源。优质内容，值得信赖。',
+  keywords: '资源分享,编程课程,音乐课程,音乐专辑,电子书,二手书,助农产品,在线学习,教育资源',
+  url: siteUrl,
+  structuredData: {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: '行书子',
+    description: '资源分享平台，提供编程课程、音乐课程、音乐专辑、各类书籍、助农产品等优质资源',
+    url: siteUrl,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${siteUrl}/search?q={search_term_string}`
+      },
+      'query-input': 'required name=search_term_string'
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '行书子',
+      url: siteUrl
+    }
+  }
+})
 </script>
 
 <style scoped>

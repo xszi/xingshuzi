@@ -26,19 +26,42 @@
 
 <script setup lang="ts">
 import { sampleResources } from '~/data/resources'
+import { generateItemListSchema, generateCourseSchema } from '~/utils/structuredData'
+
+const config = useRuntimeConfig()
+const siteUrl = config.public.siteUrl || 'https://xingshuzi.com'
 
 const resources = computed(() => {
   return sampleResources['music-course'] || []
 })
 
-useHead({
-  title: '音乐课程 - 行书子',
-  meta: [
-    {
-      name: 'description',
-      content: '专业的音乐教学课程，包括乐器、声乐、乐理等'
-    }
+const structuredData = computed(() => {
+  const courseList = resources.value.map((resource, index) => ({
+    name: resource.title,
+    description: resource.description,
+    url: `${siteUrl}/music-course#${resource.id}`
+  }))
+  
+  return [
+    generateItemListSchema(courseList),
+    ...resources.value.map(resource => 
+      generateCourseSchema({
+        name: resource.title,
+        description: resource.description,
+        url: `${siteUrl}/music-course#${resource.id}`,
+        provider: resource.author,
+        price: resource.price
+      })
+    )
   ]
+})
+
+useSEO({
+  title: '音乐课程',
+  description: '专业的音乐教学课程，包括乐器、声乐、乐理等。钢琴、吉他、声乐训练等优质课程。',
+  keywords: '音乐课程,钢琴课程,吉他课程,声乐训练,乐器教学,乐理,在线音乐学习',
+  url: `${siteUrl}/music-course`,
+  structuredData: structuredData.value
 })
 </script>
 

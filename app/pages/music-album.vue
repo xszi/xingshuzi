@@ -26,19 +26,31 @@
 
 <script setup lang="ts">
 import { sampleResources } from '~/data/resources'
+import { generateItemListSchema } from '~/utils/structuredData'
+
+const config = useRuntimeConfig()
+const siteUrl = config.public.siteUrl || 'https://xingshuzi.com'
 
 const resources = computed(() => {
   return sampleResources['music-album'] || []
 })
 
-useHead({
-  title: '音乐专辑 - 行书子',
-  meta: [
-    {
-      name: 'description',
-      content: '精选音乐专辑资源，高品质音频下载'
-    }
-  ]
+const structuredData = computed(() => {
+  const albumList = resources.value.map((resource) => ({
+    name: resource.title,
+    description: resource.description,
+    url: `${siteUrl}/music-album#${resource.id}`
+  }))
+  
+  return generateItemListSchema(albumList)
+})
+
+useSEO({
+  title: '音乐专辑',
+  description: '精选音乐专辑资源，高品质音频下载。流行音乐、轻音乐、古典音乐等各类专辑。',
+  keywords: '音乐专辑,高品质音乐,无损音质,流行音乐,轻音乐,古典音乐,音乐下载',
+  url: `${siteUrl}/music-album`,
+  structuredData: structuredData.value
 })
 </script>
 

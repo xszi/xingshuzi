@@ -27,19 +27,49 @@
 
 <script setup lang="ts">
 import { sampleResources } from '~/data/resources'
+import { generateItemListSchema } from '~/utils/structuredData'
+
+const config = useRuntimeConfig()
+const siteUrl = config.public.siteUrl || 'https://xingshuzi.com'
 
 const resources = computed(() => {
   return sampleResources['agricultural-product'] || []
 })
 
-useHead({
-  title: '助农产品 - 行书子',
-  meta: [
-    {
-      name: 'description',
-      content: '优质农产品，支持助农，跳转淘宝购买'
-    }
-  ]
+const structuredData = computed(() => {
+  const productList = resources.value.map((resource) => ({
+    name: resource.title,
+    description: resource.description,
+    url: resource.link
+  }))
+  
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: productList.map((product, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Product',
+        name: product.name,
+        description: product.description,
+        url: product.url,
+        offers: {
+          '@type': 'Offer',
+          availability: 'https://schema.org/InStock',
+          priceCurrency: 'CNY'
+        }
+      }
+    }))
+  }
+})
+
+useSEO({
+  title: '助农产品',
+  description: '优质农产品，支持助农，跳转淘宝购买。有机大米、新鲜水果、土鸡蛋等绿色健康农产品。',
+  keywords: '助农产品,农产品,有机食品,绿色食品,淘宝购买,支持助农,有机大米,新鲜水果',
+  url: `${siteUrl}/agricultural-product`,
+  structuredData: structuredData.value
 })
 </script>
 

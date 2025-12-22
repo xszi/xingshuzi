@@ -26,19 +26,42 @@
 
 <script setup lang="ts">
 import { sampleResources } from '~/data/resources'
+import { generateItemListSchema, generateBookSchema } from '~/utils/structuredData'
+
+const config = useRuntimeConfig()
+const siteUrl = config.public.siteUrl || 'https://xingshuzi.com'
 
 const resources = computed(() => {
   return sampleResources['books'] || []
 })
 
-useHead({
-  title: '各类书籍 - 行书子',
-  meta: [
-    {
-      name: 'description',
-      content: '电子书、二手书等各类图书资源'
-    }
+const structuredData = computed(() => {
+  const bookList = resources.value.map((resource) => ({
+    name: resource.title,
+    description: resource.description,
+    url: `${siteUrl}/books#${resource.id}`
+  }))
+  
+  return [
+    generateItemListSchema(bookList),
+    ...resources.value.map(resource => 
+      generateBookSchema({
+        name: resource.title,
+        description: resource.description,
+        url: `${siteUrl}/books#${resource.id}`,
+        author: resource.author,
+        price: resource.price
+      })
+    )
   ]
+})
+
+useSEO({
+  title: '各类书籍',
+  description: '电子书、二手书等各类图书资源。编程书籍、技术书籍、经典文学作品等。',
+  keywords: '电子书,二手书,编程书籍,技术书籍,JavaScript,计算机科学,设计模式,图书资源',
+  url: `${siteUrl}/books`,
+  structuredData: structuredData.value
 })
 </script>
 
