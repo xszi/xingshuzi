@@ -26,18 +26,22 @@
 </template>
 
 <script setup lang="ts">
-import { sampleResources } from '~/data/resources'
 import { generateItemListSchema } from '~/utils/structuredData'
 
 const config = useRuntimeConfig()
 const siteUrl = config.public.siteUrl || 'https://xingshuzi.com'
+const apiBase = config.public.apiBase
+
+// 从后端接口获取数据
+const { data: apiResponse, pending } = await useFetch<any>(`${apiBase}/products/agriculture`)
 
 const resources = computed(() => {
-  return sampleResources['agricultural-product'] || []
+  const data = apiResponse.value?.data
+  return Array.isArray(data) ? data : []
 })
 
 const structuredData = computed(() => {
-  const productList = resources.value.map((resource) => ({
+  const productList = resources.value.map((resource: any) => ({
     name: resource.title,
     description: resource.description,
     url: resource.link
@@ -46,7 +50,7 @@ const structuredData = computed(() => {
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    itemListElement: productList.map((product, index) => ({
+    itemListElement: productList.map((product: any, index: number) => ({
       '@type': 'ListItem',
       position: index + 1,
       item: {

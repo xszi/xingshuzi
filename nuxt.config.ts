@@ -2,9 +2,12 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  
+
   // 确保服务端渲染（SSR）模式
   ssr: true,
+
+  // Element Plus 模块
+  modules: ['@element-plus/nuxt'],
   
   // SEO 优化配置
   site: {
@@ -17,7 +20,8 @@ export default defineNuxtConfig({
   // 运行时配置
   runtimeConfig: {
     public: {
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://xingshuzi.com'
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://xingshuzi.com',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://127.0.0.1:5000/api'
     }
   },
   

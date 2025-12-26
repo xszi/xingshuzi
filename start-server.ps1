@@ -20,3 +20,6 @@ if (-not (Test-Path $serverPath)) {
 node $serverPath
 
 
+
+
+

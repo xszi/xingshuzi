@@ -25,30 +25,34 @@
 </template>
 
 <script setup lang="ts">
-import { sampleResources } from '~/data/resources'
 import { generateItemListSchema, generateBookSchema } from '~/utils/structuredData'
 
 const config = useRuntimeConfig()
 const siteUrl = config.public.siteUrl || 'https://xingshuzi.com'
+const apiBase = config.public.apiBase
+
+// 从后端接口获取数据
+const { data: apiResponse, pending } = await useFetch<any>(`${apiBase}/books/list`)
 
 const resources = computed(() => {
-  return sampleResources['books'] || []
+  const data = apiResponse.value?.data
+  return Array.isArray(data) ? data : []
 })
 
 const structuredData = computed(() => {
-  const bookList = resources.value.map((resource) => ({
+  const bookList = resources.value.map((resource: any) => ({
     name: resource.title,
     description: resource.description,
-    url: `${siteUrl}/books#${resource.id}`
+    url: `${siteUrl}/books#${resource.id || resource._id}`
   }))
   
   return [
     generateItemListSchema(bookList),
-    ...resources.value.map(resource => 
+    ...resources.value.map((resource: any) => 
       generateBookSchema({
         name: resource.title,
         description: resource.description,
-        url: `${siteUrl}/books#${resource.id}`,
+        url: `${siteUrl}/books#${resource.id || resource._id}`,
         author: resource.author,
         price: resource.price
       })

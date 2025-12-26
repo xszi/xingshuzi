@@ -1,7 +1,7 @@
 <template>
   <div class="resource-card">
-    <div class="resource-cover" v-if="resource.cover">
-      <img :src="resource.cover" :alt="resource.title" loading="lazy" />
+    <div class="resource-cover" v-if="resource.cover || resource.image_url || resource.cover_url">
+      <img :src="resource.cover || resource.image_url || resource.cover_url" :alt="resource.title" loading="lazy" />
     </div>
     <div class="resource-content">
       <h3 class="resource-title">{{ resource.title }}</h3>

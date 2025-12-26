@@ -218,3 +218,6 @@ const courseSchema = generateCourseSchema({
 - `server/routes/sitemap.xml.ts` - Sitemap 生成
 - `public/robots.txt` - Robots 文件
 
+
+
+

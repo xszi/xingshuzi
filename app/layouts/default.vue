@@ -12,6 +12,36 @@
           <NuxtLink to="/music-album" class="nav-link">音乐专辑</NuxtLink>
           <NuxtLink to="/books" class="nav-link">各类书籍</NuxtLink>
           <NuxtLink to="/agricultural-product" class="nav-link">助农产品</NuxtLink>
+          
+          <!-- 管理员入口 -->
+          <ClientOnly>
+            <NuxtLink v-if="isAdmin" to="/admin" class="nav-link admin-link">
+              后台管理
+            </NuxtLink>
+            <template #fallback>
+              <!-- SSR 占位 -->
+            </template>
+          </ClientOnly>
+          
+          <!-- 用户状态 -->
+          <ClientOnly>
+            <div class="user-section">
+              <NuxtLink v-if="!isLoggedIn" to="/login" class="nav-link login-btn">
+                登录
+              </NuxtLink>
+              <div v-else class="user-menu">
+                <span class="user-name">{{ user?.username }}</span>
+                <button @click="handleLogout" class="logout-btn">退出</button>
+              </div>
+            </div>
+            <template #fallback>
+              <div class="user-section">
+                <NuxtLink to="/login" class="nav-link login-btn">
+                  登录
+                </NuxtLink>
+              </div>
+            </template>
+          </ClientOnly>
         </nav>
       </div>
     </header>
@@ -27,6 +57,16 @@
     </footer>
   </div>
 </template>
+
+<script setup lang="ts">
+const { user, isLoggedIn, isAdmin, logout } = useAuth()
+
+const handleLogout = () => {
+  if (confirm('确定要退出登录吗？')) {
+    logout()
+  }
+}
+</script>
 
 <style scoped>
 .layout-container {
@@ -66,6 +106,7 @@
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .nav-link {
@@ -81,6 +122,60 @@
 
 .nav-link.router-link-active {
   border-bottom: 2px solid white;
+}
+
+.admin-link {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  margin-left: 0.5rem;
+}
+
+.admin-link:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.user-section {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.login-btn {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+}
+
+.login-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-name {
+  color: white;
+  font-weight: 500;
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .main-content {
