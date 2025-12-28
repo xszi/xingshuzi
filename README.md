@@ -80,7 +80,7 @@ pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 在项目根目录创建 `.env` 文件，配置数据库连接信息：
 
 ```ini
-MYSQL_USER=root
+MYSQL_USER=jhadmin
 MYSQL_PASSWORD=your_password
 MYSQL_HOST=localhost
 MYSQL_PORT=3306

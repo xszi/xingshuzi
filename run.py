@@ -19,6 +19,6 @@ if __name__ == '__main__':
             print(f"Error creating database tables: {e}")
             print("Make sure your MySQL server is running and the database exists.")
     
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
 
 
