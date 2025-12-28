@@ -270,7 +270,7 @@ Content-Type: application/json
 
 ```bash
 # 后端 API 地址
-NUXT_PUBLIC_API_BASE=http://127.0.0.1:5000/api
+NUXT_PUBLIC_API_BASE=http://127.0.0.1:5001/api
 
 # 生产环境
 # NUXT_PUBLIC_API_BASE=https://api.xingshuzi.com/api
