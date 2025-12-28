@@ -75,7 +75,7 @@ pip install -r requirements.txt
 pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
-### 2. 配置数据库
+### 2. 配置数据库111
 
 在项目根目录创建 `.env` 文件，配置数据库连接信息：
 
