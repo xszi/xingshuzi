@@ -19,6 +19,10 @@ if __name__ == '__main__':
             print(f"Error creating database tables: {e}")
             print("Make sure your MySQL server is running and the database exists.")
     
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    # Get configuration from environment
+    debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    port = int(os.getenv('FLASK_PORT', '5000'))
+    
+    app.run(host='0.0.0.0', port=port, debug=debug)
 
 
