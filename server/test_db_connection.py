@@ -10,9 +10,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-user = os.getenv('MYSQL_USER', 'jhadmin')
-password = os.getenv('MYSQL_PASSWORD', 'Ww@204417')
-host = os.getenv('MYSQL_HOST', '120.76.247.123')
+user = os.getenv('MYSQL_USER', 'root')
+password = os.getenv('MYSQL_PASSWORD', '123456')
+host = os.getenv('MYSQL_HOST', '127.0.0.1')
 port = int(os.getenv('MYSQL_PORT', 3306))
 db_name = os.getenv('MYSQL_DB', 'xingshuzi')
 
