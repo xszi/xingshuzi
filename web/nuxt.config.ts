@@ -8,16 +8,6 @@ export default defineNuxtConfig({
 
   // Element Plus 模块
   modules: ['@element-plus/nuxt'],
-
-  // Vite dev HMR：避免默认 24678 端口在多实例/残留进程时冲突
-  vite: {
-    server: {
-      hmr: {
-        port: 24679,
-        clientPort: 24679
-      }
-    }
-  },
   
   // SEO 优化配置
   site: {

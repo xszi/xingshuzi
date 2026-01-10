@@ -1,0 +1,143 @@
+<template>
+  <div class="category-page">
+    <div class="category-header">
+      <h1 class="category-title">
+        <span class="category-icon">💻</span>
+        编程课程
+      </h1>
+      <p class="category-description">优质的编程学习课程，涵盖前端、后端、移动开发等</p>
+    </div>
+
+    <div v-if="resources.length > 0" class="resources-section">
+      <div class="resources-grid">
+        <ResourceCard 
+          v-for="resource in resources" 
+          :key="resource.id" 
+          :resource="resource" 
+        />
+      </div>
+    </div>
+
+    <div v-else class="empty-state">
+      <p>暂无资源，敬请期待...</p>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { generateItemListSchema, generateCourseSchema } from '~/utils/structuredData'
+
+const config = useRuntimeConfig()
+const siteUrl = config.public.siteUrl || 'https://xingshuzi.com'
+const apiBase = config.public.apiBase
+
+// 从后端接口获取数据
+const { data: apiResponse, pending } = await useFetch<any>(`${apiBase}/courses/programming`)
+
+const resources = computed(() => {
+  const data = apiResponse.value?.data
+  return Array.isArray(data) ? data : []
+})
+
+// 生成结构化数据
+const structuredData = computed(() => {
+  const courseList = resources.value.map((resource: any) => ({
+    name: resource.title,
+    description: resource.description,
+    url: `${siteUrl}/programming-course#${resource.id || resource._id}`
+  }))
+  
+  return [
+    generateItemListSchema(courseList),
+    ...resources.value.map((resource: any) => 
+      generateCourseSchema({
+        name: resource.title,
+        description: resource.description,
+        url: `${siteUrl}/programming-course#${resource.id || resource._id}`,
+        provider: resource.author,
+        price: resource.price
+      })
+    )
+  ]
+})
+
+useSEO({
+  title: '编程课程',
+  description: '优质的编程学习课程，涵盖前端、后端、移动开发等。Vue.js、Node.js、TypeScript 等热门技术课程。',
+  keywords: '编程课程,前端开发,后端开发,JavaScript,Vue,Node.js,TypeScript,在线学习,编程教程',
+  url: `${siteUrl}/programming-course`,
+  structuredData: structuredData.value
+})
+</script>
+
+<style scoped>
+.category-page {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.category-header {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  margin-bottom: 3rem;
+  color: white;
+}
+
+.category-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: white;
+}
+
+.category-icon {
+  font-size: 3rem;
+}
+
+.category-description {
+  font-size: 1.2rem;
+  margin: 0;
+  opacity: 0.95;
+}
+
+.resources-section {
+  margin-bottom: 2rem;
+}
+
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state p {
+  font-size: 1.2rem;
+  color: #999;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .category-title {
+    font-size: 2rem;
+    flex-direction: column;
+  }
+  
+  .resources-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
