@@ -17,11 +17,16 @@ export default defineNuxtConfig({
     defaultLocale: 'zh-CN'
   },
   
+  // 开发服务器配置
+  devServer: {
+    port: 3001
+  },
+
   // 运行时配置
   runtimeConfig: {
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://xingshuzi.com',
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://127.0.0.1:5000/api'
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://127.0.0.1:5001/api'
     }
   },
   
