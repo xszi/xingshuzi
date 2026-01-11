@@ -23,8 +23,9 @@ logs
 .env.*
 !.env.example
 
-# 数据库备份
+# 数据库备份（但不包括初始化脚本）
 *.sql
+!mysql-standalone/init.sql
 *.sql.gz
 mysql_backups/
 backup_*.sql
