@@ -1,31 +1,30 @@
-# Dockerfile for xingshuzi-back Flask Application
 FROM python:3.11-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# 安装系统依赖
 RUN apt-get update && apt-get install -y \
     gcc \
     default-libmysqlclient-dev \
     pkg-config \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
+# 复制依赖文件
 COPY requirements.txt .
 
-# 使用清华镜像源安装依赖，并增加超时时间
-RUN pip install --no-cache-dir -r requirements.txt \
-    -i https://pypi.tuna.tsinghua.edu.cn/simple \
-    --trusted-host pypi.tuna.tsinghua.edu.cn \
-    --timeout 120
+# 安装Python依赖
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# 复制项目文件
 COPY . .
 
-# Expose port
-EXPOSE 5000
+# 暴露端口
+EXPOSE 5001
 
-# Run the application
-CMD ["python", "run.py"]
+# 设置环境变量
+ENV FLASK_PORT=5001
+
+# 启动命令
+CMD ["python3", "run.py"]
 

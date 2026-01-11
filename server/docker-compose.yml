@@ -1,54 +1,27 @@
+version: '3.8'
+
 services:
-  # MySQL 数据库服务
-  mysql:
-    image: mysql:8.0
-    container_name: xingshuzi-mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: MyStrongRootPassword123
-      MYSQL_DATABASE: xingshuzi
-      MYSQL_CHARACTER_SET_SERVER: utf8mb4
-      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: xingshuzi-api
+    restart: unless-stopped
     ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - xingshuzi-network
+      - "5001:5001"
+    environment:
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-MyStrongRootPassword123}
+      - MYSQL_HOST=${MYSQL_HOST:-120.76.247.123}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - MYSQL_DB=${MYSQL_DB:-xingshuzi}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-jwt-secret-key}
+      - FLASK_PORT=5001
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pMyStrongRootPassword123"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Flask 应用服务
-  app:
-    build: .
-    container_name: xingshuzi-app
-    restart: always
-    ports:
-      - "5000:5000"
-    environment:
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=MyStrongRootPassword123
-      - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
-      - MYSQL_DB=xingshuzi
-      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-this}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-jwt-secret-key-change-this}
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - xingshuzi-network
-    volumes:
-      - ./app:/app/app
-      - ./config:/app/config
-
-networks:
-  xingshuzi-network:
-    driver: bridge
-
-volumes:
-  mysql_data:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/home/banners"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 

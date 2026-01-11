@@ -1,0 +1,261 @@
+╔══════════════════════════════════════════════════════════════╗
+║     星书子项目 Docker 分开部署 - 快速指南（Git方式）         ║
+║     ECS IP: 120.76.247.123  |  系统: Ubuntu 20.04/22.04      ║
+╚══════════════════════════════════════════════════════════════╝
+
+📦 部署方式：通过Git克隆代码
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ 优势：
+  - 版本控制，易于管理
+  - git pull快速更新
+  - 可以回滚到任意版本
+  - 支持多人协作
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 快速部署步骤
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+═══ 准备工作（仅首次需要）═══
+
+1. SSH登录ECS
+   ssh root@120.76.247.123
+
+2. 安装Docker和Docker Compose
+   curl -fsSL https://get.docker.com | sh
+   systemctl start docker
+   systemctl enable docker
+
+3. 安装Git
+   apt update
+   apt install git -y
+   git --version
+
+4. 配置Git SSH密钥（私有仓库需要）
+   ssh-keygen -t rsa -b 4096 -C "your.email@example.com"
+   cat ~/.ssh/id_rsa.pub
+   # 复制公钥，添加到GitHub/Gitee的SSH Keys
+
+═══ 首次部署 ═══
+
+1. 克隆代码仓库
+   cd /root
+   git clone git@github.com:your-username/xingshuzi.git
+   # 或HTTPS: git clone https://github.com/your-username/xingshuzi.git
+   cd xingshuzi
+
+2. 部署Flask后端
+   cd /root/xingshuzi/server
+   cp .env.example .env
+   chmod +x deploy.sh
+   ./deploy.sh
+
+3. 验证后端
+   curl http://localhost:5001/api/home/banners
+   # 应返回: {"code":200,"data":[],"msg":"success"}
+
+4. 部署Nuxt前端（需5-10分钟）
+   cd /root/xingshuzi/web
+   chmod +x deploy.sh
+   ./deploy.sh
+
+5. 验证前端
+   curl -I http://localhost:3000
+   # 应返回: HTTP/1.1 200 OK
+
+═══ 更新部署（使用Git）═══
+
+1. 拉取最新代码
+   cd /root/xingshuzi
+   git pull origin main
+
+2. 更新后端（如果后端有变更）
+   cd server
+   ./deploy.sh
+
+3. 更新前端（如果前端有变更）
+   cd web
+   ./deploy.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🌐 访问地址
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+前端: http://120.76.247.123:3000
+API:  http://120.76.247.123:5001/api
+
+登录账号:
+  用户名: admin
+  密码: admin123
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔧 常用管理命令
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Git操作:
+  cd /root/xingshuzi
+  git pull origin main           # 拉取最新代码
+  git status                     # 查看状态
+  git log -5 --oneline          # 查看最近提交
+
+后端管理:
+  cd /root/xingshuzi/server
+  docker compose logs -f         # 查看日志
+  docker compose ps              # 查看状态
+  docker compose restart         # 重启
+  docker compose down            # 停止
+  ./deploy.sh                    # 重新部署
+
+前端管理:
+  cd /root/xingshuzi/web
+  docker compose logs -f         # 查看日志
+  docker compose ps              # 查看状态
+  docker compose restart         # 重启
+  docker compose down            # 停止
+  ./deploy.sh                    # 重新部署
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚙️ ECS前置要求
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+系统: Ubuntu 20.04 或 22.04
+配置: 2核4GB内存（最低）
+
+安装软件:
+  ✅ Docker 和 Docker Compose
+  ✅ Git
+  ✅ SSH密钥配置（私有仓库）
+
+安全组开放端口:
+  ✅ 22端口 (SSH)
+  ✅ 3000端口 (Web前端)
+  ✅ 5001端口 (API后端)
+
+数据库:
+  ✅ MySQL 8.0 (120.76.247.123:3306)
+  ✅ 数据库名: xingshuzi
+
+Git仓库:
+  ✅ 代码已推送到Git仓库
+  ✅ ECS可以访问Git仓库
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 部署架构
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+阿里云ECS Ubuntu (120.76.247.123)
+│
+├─ /root/xingshuzi/             Git仓库
+│
+├─ Flask后端容器 (端口5001)
+│  └─ API: http://120.76.247.123:5001/api
+│
+├─ Nuxt前端容器 (端口3000)
+│  └─ Web: http://120.76.247.123:3000
+│  └─ 连接API: http://120.76.247.123:5001/api
+│
+└─ MySQL数据库 (端口3306)
+   └─ 地址: 120.76.247.123:3306
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 Git SSH密钥配置步骤
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. 在ECS上生成SSH密钥
+   ssh-keygen -t rsa -b 4096 -C "your.email@example.com"
+   # 按回车使用默认路径
+
+2. 查看公钥
+   cat ~/.ssh/id_rsa.pub
+
+3. 复制公钥内容
+
+4. 添加到Git平台
+   GitHub: Settings → SSH and GPG keys → New SSH key
+   Gitee:  设置 → SSH公钥 → 添加公钥
+
+5. 测试连接
+   ssh -T git@github.com
+   # 或: ssh -T git@gitee.com
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔄 典型工作流程
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本地开发 → 推送到Git → ECS拉取代码 → 重新部署
+
+详细步骤:
+  1. 本地开发完成
+     git add .
+     git commit -m "feature: 添加新功能"
+     git push origin main
+
+  2. SSH登录ECS
+     ssh root@120.76.247.123
+
+  3. 拉取最新代码
+     cd /root/xingshuzi
+     git pull origin main
+
+  4. 重新部署变更的服务
+     cd server && ./deploy.sh    # 后端有变更
+     cd web && ./deploy.sh       # 前端有变更
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🐛 常见问题
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Q: Git克隆失败？
+A: 检查网络: ping github.com
+   检查SSH: ssh -T git@github.com
+   使用HTTPS: git clone https://github.com/user/repo.git
+
+Q: Permission denied (publickey)？
+A: SSH密钥未配置或未添加到Git平台
+   重新生成并添加公钥
+
+Q: 代码更新后未生效？
+A: 确保git pull成功
+   重新构建: docker compose build --no-cache
+   重新部署: ./deploy.sh
+
+Q: 端口被占用？
+A: 检查端口: netstat -tlnp | grep 5001
+   停止旧容器: docker compose down
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📖 完整文档
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+详细部署文档: DEPLOY_README.md
+  - Git工作流程
+  - 分支管理
+  - 版本回滚
+  - 自动化部署
+  - 故障排查
+  - 性能监控
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 重要提示
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Server和Web是完全独立的Docker容器
+2. 通过Git管理代码，git pull更新代码
+3. 前端构建需要5-10分钟，请耐心等待
+4. 确保ECS安全组已开放3000和5001端口
+5. .env文件不要提交到Git仓库
+6. 定期git pull保持代码最新
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+使用Git方式部署，代码管理更简单！🎉

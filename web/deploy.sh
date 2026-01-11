@@ -3,7 +3,7 @@
 set -e
 
 echo "=========================================="
-echo "  Flask后端服务 Docker 部署脚本"
+echo "  Nuxt前端服务 Docker 部署脚本"
 echo "=========================================="
 echo ""
 
@@ -26,22 +26,9 @@ fi
 
 echo -e "${GREEN}✓${NC} Docker和Docker Compose已安装"
 
-# 检查.env文件
-if [ ! -f .env ]; then
-    echo -e "${YELLOW}警告: .env文件不存在${NC}"
-    if [ -f .env.example ]; then
-        echo "从.env.example复制..."
-        cp .env.example .env
-        echo -e "${GREEN}✓${NC} 已创建.env文件"
-    else
-        echo -e "${RED}错误: .env.example文件不存在${NC}"
-        exit 1
-    fi
-fi
-
 echo ""
 echo "=========================================="
-echo "  开始部署Flask后端..."
+echo "  开始部署Nuxt前端..."
 echo "=========================================="
 echo ""
 
@@ -49,9 +36,9 @@ echo ""
 echo "1. 停止旧容器..."
 docker compose down 2>/dev/null || true
 
-# 构建镜像
+# 构建镜像（前端构建较慢）
 echo ""
-echo "2. 构建Docker镜像..."
+echo "2. 构建Docker镜像（约需5-10分钟）..."
 docker compose build --no-cache
 
 # 启动服务
@@ -62,7 +49,7 @@ docker compose up -d
 # 等待服务启动
 echo ""
 echo "4. 等待服务启动..."
-sleep 10
+sleep 15
 
 # 检查服务状态
 echo ""
@@ -72,10 +59,10 @@ docker compose ps
 # 健康检查
 echo ""
 echo "6. 健康检查..."
-if curl -f http://localhost:5001/api/home/banners > /dev/null 2>&1; then
-    echo -e "${GREEN}✓ API服务正常${NC}"
+if curl -I http://localhost:3000 > /dev/null 2>&1; then
+    echo -e "${GREEN}✓ Web服务正常${NC}"
 else
-    echo -e "${YELLOW}⚠ API服务可能未就绪，请查看日志${NC}"
+    echo -e "${YELLOW}⚠ Web服务可能未就绪，请查看日志${NC}"
 fi
 
 echo ""
@@ -84,8 +71,9 @@ echo -e "  ${GREEN}部署完成！${NC}"
 echo "=========================================="
 echo ""
 echo "服务信息:"
-echo "  容器名称: xingshuzi-api"
-echo "  端口: 5001"
+echo "  容器名称: xingshuzi-web"
+echo "  端口: 3000"
+echo "  访问地址: http://120.76.247.123:3000"
 echo "  API地址: http://120.76.247.123:5001/api"
 echo ""
 echo "常用命令:"
@@ -93,6 +81,6 @@ echo "  查看日志: docker compose logs -f"
 echo "  重启服务: docker compose restart"
 echo "  停止服务: docker compose down"
 echo ""
-echo -e "${YELLOW}注意: 确保ECS安全组已开放5001端口${NC}"
+echo -e "${YELLOW}注意: 确保ECS安全组已开放3000端口${NC}"
 echo ""
 
