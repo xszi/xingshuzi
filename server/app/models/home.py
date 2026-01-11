@@ -5,16 +5,16 @@ class HomeBanner(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100))
-    image_url = db.Column(db.String(255))
-    link_url = db.Column(db.String(255))
+    image = db.Column(db.String(500))  # 匹配数据库字段名
+    link = db.Column(db.String(500))   # 匹配数据库字段名
     sort_order = db.Column(db.Integer, default=0)
 
     def to_dict(self):
         return {
             'id': self.id,
             'title': self.title,
-            'image_url': self.image_url,
-            'link_url': self.link_url,
+            'image_url': self.image,  # 返回给前端时使用image_url
+            'link_url': self.link,    # 返回给前端时使用link_url
             'sort_order': self.sort_order
         }
 
