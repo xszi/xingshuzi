@@ -5,6 +5,9 @@ WORKDIR /app
 # 复制package文件
 COPY package*.json ./
 
+# 使用淘宝npm镜像加速（国内部署）
+RUN npm config set registry https://registry.npmmirror.com
+
 # 安装依赖
 RUN npm ci
 
@@ -25,6 +28,9 @@ WORKDIR /app
 # 复制构建产物和package文件
 COPY --from=builder /app/.output /app/.output
 COPY --from=builder /app/package*.json ./
+
+# 使用淘宝npm镜像加速
+RUN npm config set registry https://registry.npmmirror.com
 
 # 只安装生产依赖
 RUN npm ci --production
