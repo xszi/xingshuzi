@@ -22,3 +22,14 @@ class Config:
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', SECRET_KEY)
     JWT_ACCESS_TOKEN_EXPIRES = 3600 * 24  # 24 hours
 
+    # 文件上传配置
+    # 上传根目录（绝对路径），默认为项目内 server/uploads
+    UPLOAD_FOLDER = os.getenv(
+        'UPLOAD_FOLDER',
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads')
+    )
+    # 单文件最大 10MB
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024
+    # 允许的图片扩展名
+    ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'}
+

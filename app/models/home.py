@@ -4,9 +4,10 @@ class HomeBanner(db.Model):
     __tablename__ = 'home_banners'
     
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100))
-    image_url = db.Column(db.String(255))
-    link_url = db.Column(db.String(255))
+    title = db.Column(db.String(200))
+    # 线上 home_banners 表的列名为 image / link
+    image_url = db.Column('image', db.String(500))
+    link_url = db.Column('link', db.String(500))
     sort_order = db.Column(db.Integer, default=0)
 
     def to_dict(self):

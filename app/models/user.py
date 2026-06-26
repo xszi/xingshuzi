@@ -7,10 +7,13 @@ class User(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    # 线上 users 表的列名为 password，这里映射到模型属性 password_hash
+    password_hash = db.Column('password', db.String(255), nullable=False)
     email = db.Column(db.String(100))
     role = db.Column(db.String(20), default='user')  # 'user' or 'admin'
+    status = db.Column(db.String(20), default='active')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def set_password(self, password):
         # Use pbkdf2:sha256 instead of scrypt for compatibility with Python 3.9.6
