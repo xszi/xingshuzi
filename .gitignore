@@ -30,21 +30,9 @@ logs
 .env.*
 !.env.example
 
-# 本地调试/初始化脚本（含明文凭据，禁止提交）
-server/test_*.py
-server/create_db.py
-server/create_sample_data.py
-server/init_admin.py
-server/run_prod.py
-
-# 含明文密码/服务器信息的文档（禁止提交）
-server/API.md
-server/DB_TROUBLESHOOTING.md
-server/DEPLOY.md
-server/README.md
-
-# 用户上传的文件（图片等，禁止提交）
-server/uploads/
+# 后端 server/ 是独立的 git 仓库（github.com/xszi/xingshuzi-back），
+# 由它自己单独管理，外层仓库不跟踪其内容。
+server/
 
 # 数据库备份（但不包括初始化脚本）
 *.sql
