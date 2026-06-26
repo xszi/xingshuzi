@@ -54,6 +54,7 @@
 <script setup lang="ts">
 const { login, register } = useAuth()
 const router = useRouter()
+const route = useRoute()
 
 const isLogin = ref(true)
 const loading = ref(false)
@@ -73,8 +74,9 @@ const handleSubmit = async () => {
       // 登录
       const result = await login(formData.value.username, formData.value.password)
       if (result.success) {
-        // 登录成功，跳转到首页
-        router.push('/')
+        // 登录成功：若有回跳地址则返回原页面，否则回首页
+        const redirect = route.query.redirect as string | undefined
+        router.push(redirect || '/')
       } else {
         errorMessage.value = result.message || '登录失败'
       }

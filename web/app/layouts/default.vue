@@ -5,6 +5,7 @@
         <NuxtLink to="/" class="logo-link">
           <h1 class="logo">行书子</h1>
         </NuxtLink>
+        <NuxtLink to="/xiaohongshu-calendar" class="calendar-link">发小红书日历</NuxtLink>
         <nav class="nav" role="navigation" aria-label="主导航">
           <NuxtLink to="/" class="nav-link">首页</NuxtLink>
           <NuxtLink to="/programming-course" class="nav-link">编程课程</NuxtLink>
@@ -100,6 +101,47 @@ const handleLogout = () => {
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
+}
+
+.calendar-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  margin-right: auto;
+  margin-left: 1.5rem;
+  white-space: nowrap;
+  transition: background 0.3s;
+}
+
+.calendar-link:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0 1rem;
+  }
+
+  .calendar-link {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .nav {
+    gap: 0.8rem 1rem;
+    width: 100%;
+  }
+
+  .user-section {
+    margin-left: 0;
+  }
 }
 
 .nav {

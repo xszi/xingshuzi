@@ -29,6 +29,10 @@
           <span class="icon">🌾</span>
           <span>助农产品</span>
         </NuxtLink>
+        <NuxtLink to="/admin/xiaohongshu" class="sidebar-link">
+          <span class="icon">📕</span>
+          <span>发小红书</span>
+        </NuxtLink>
         <div class="sidebar-divider"></div>
         <NuxtLink to="/admin/debug" class="sidebar-link">
           <span class="icon">🔧</span>
@@ -57,14 +61,10 @@
 </template>
 
 <script setup lang="ts">
-const { user, isAdmin, logout } = useAuth()
-const router = useRouter()
+const { user, logout } = useAuth()
 const route = useRoute()
 
-// 如果不是管理员，跳转到首页
-if (process.client && !isAdmin.value) {
-  router.push('/')
-}
+// 访问权限由路由中间件 middleware/admin.ts 统一校验
 
 const pageTitle = computed(() => {
   const path = route.path
@@ -74,6 +74,7 @@ const pageTitle = computed(() => {
   if (path.includes('music-albums')) return '音乐专辑管理'
   if (path.includes('books')) return '书籍管理'
   if (path.includes('agricultural-products')) return '助农产品管理'
+  if (path.includes('xiaohongshu')) return '发小红书内容管理'
   return '后台管理'
 })
 

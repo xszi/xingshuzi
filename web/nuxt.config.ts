@@ -22,6 +22,23 @@ export default defineNuxtConfig({
     port: 3001
   },
 
+  // Vite 配置：Windows 上原生文件监听会触发 EPERM 崩溃，改用轮询模式（polling）规避
+  vite: {
+    server: {
+      watch: {
+        usePolling: true,
+        interval: 300,
+        ignored: [
+          '**/node_modules/**',
+          '**/.nuxt/**',
+          '**/.output/**',
+          '**/.git/**',
+          '**/dist/**'
+        ]
+      }
+    }
+  },
+
   // 运行时配置
   runtimeConfig: {
     public: {

@@ -9,6 +9,13 @@ dist
 # Node dependencies
 node_modules
 
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
 # Logs
 logs
 *.log
@@ -22,6 +29,22 @@ logs
 .env
 .env.*
 !.env.example
+
+# 本地调试/初始化脚本（含明文凭据，禁止提交）
+server/test_*.py
+server/create_db.py
+server/create_sample_data.py
+server/init_admin.py
+server/run_prod.py
+
+# 含明文密码/服务器信息的文档（禁止提交）
+server/API.md
+server/DB_TROUBLESHOOTING.md
+server/DEPLOY.md
+server/README.md
+
+# 用户上传的文件（图片等，禁止提交）
+server/uploads/
 
 # 数据库备份（但不包括初始化脚本）
 *.sql

@@ -103,7 +103,8 @@
 
 <script setup lang="ts">
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'admin'
 })
 
 const { user, token } = useAuth()

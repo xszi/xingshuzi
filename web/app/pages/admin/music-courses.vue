@@ -26,7 +26,8 @@
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'admin'
 })
 
 const courses = ref<any[]>([])

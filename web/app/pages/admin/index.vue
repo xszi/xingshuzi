@@ -81,7 +81,8 @@
 
 <script setup lang="ts">
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'admin'
 })
 
 const stats = ref({

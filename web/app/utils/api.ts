@@ -57,8 +57,33 @@ export const api = {
       body: JSON.stringify(body)
     }),
   
-  delete: <T = any>(url: string) => 
-    apiRequest<T>(url, { method: 'DELETE' })
+  delete: <T = any>(url: string) =>
+    apiRequest<T>(url, { method: 'DELETE' }),
+
+  // 上传文件（multipart/form-data，不能手动设置 Content-Type）
+  upload: <T = any>(url: string, file: File): Promise<T> => {
+    const config = useRuntimeConfig()
+    const apiBase = config.public.apiBase
+
+    let token: string | null = null
+    if (process.client) {
+      token = localStorage.getItem('token')
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const headers: Record<string, string> = {}
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    return $fetch<T>(`${apiBase}${url}`, {
+      method: 'POST',
+      headers,
+      body: formData
+    })
+  }
 }
 
 
