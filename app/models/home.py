@@ -14,8 +14,8 @@ class HomeBanner(db.Model):
         return {
             'id': self.id,
             'title': self.title,
-            'image_url': self.image_url,
-            'link_url': self.link_url,
+            'image_url': self.image,  # 返回给前端时使用image_url
+            'link_url': self.link,    # 返回给前端时使用link_url
             'sort_order': self.sort_order
         }
 
