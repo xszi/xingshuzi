@@ -54,13 +54,18 @@
                 :name="tab.name"
               >
                 <template #label>
-                  <span>
-                    {{ tab.label }}
+                  <span class="period-tab-label">
+                    <span class="period-name">{{ tab.label }}</span>
+                    <span class="period-time">{{ tab.time }}</span>
                     <el-badge v-if="forms[stu.name][tab.name].id" is-dot type="danger" />
                   </span>
                 </template>
 
                 <div class="post-form">
+                  <div class="best-time-tip">
+                    🕐 最佳发布时间：{{ tab.label }} {{ tab.time }}
+                  </div>
+
                   <div class="form-item">
                     <label>标题</label>
                     <el-input
@@ -183,11 +188,12 @@ interface PostForm {
 // 所挂商品可选项（与后端 PRODUCTS 一致）
 const productOptions = ['考研', '雅思', '六级', '四级', '小学语法学习纸']
 
-const periodTabs: { name: Period; label: string }[] = [
-  { name: 'morning', label: '早上' },
-  { name: 'noon', label: '中午' },
-  { name: 'evening', label: '傍晚' },
-  { name: 'night', label: '晚上' }
+// 各时段最佳发布时间
+const periodTabs: { name: Period; label: string; time: string }[] = [
+  { name: 'morning', label: '早上', time: '7:30-8:30' },
+  { name: 'noon', label: '中午', time: '11:30-12:30' },
+  { name: 'evening', label: '傍晚', time: '18:30-19:30' },
+  { name: 'night', label: '晚上', time: '21:00-22:00' }
 ]
 
 const studentTabs: { name: Student; label: string }[] = [
@@ -500,9 +506,36 @@ const refreshDayMark = async (date: string) => {
   background: #e6e9ff;
 }
 
+/* 时段标签：名称 + 最佳时间 */
+.period-tab-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.period-name {
+  font-weight: 500;
+}
+
+.period-time {
+  font-size: 0.75rem;
+  color: #909399;
+}
+
 /* 弹窗表单 */
 .post-form {
   padding: 0.5rem 0.25rem;
+}
+
+/* 最佳发布时间提示条 */
+.best-time-tip {
+  margin-bottom: 1.25rem;
+  padding: 0.6rem 1rem;
+  background: #fff0f3;
+  border-left: 3px solid #ff2442;
+  border-radius: 4px;
+  color: #d81e06;
+  font-size: 0.9rem;
 }
 
 .form-item {

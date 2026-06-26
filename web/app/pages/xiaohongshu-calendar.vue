@@ -50,10 +50,14 @@
               <el-tab-pane
                 v-for="post in group.posts"
                 :key="post.period"
-                :label="periodLabel(post.period)"
+                :label="`${periodLabel(post.period)} ${periodTime(post.period)}`"
                 :name="post.period"
               >
                 <div class="post-view">
+                  <div class="best-time-tip">
+                    🕐 最佳发布时间：{{ periodLabel(post.period) }} {{ periodTime(post.period) }}
+                  </div>
+
                   <div v-if="post.title" class="view-item">
                     <div class="view-label-row">
                       <span class="view-label">标题</span>
@@ -169,8 +173,16 @@ const periodLabels: Record<Period, string> = {
   evening: '傍晚',
   night: '晚上'
 }
+// 各时段最佳发布时间
+const periodTimes: Record<Period, string> = {
+  morning: '7:30-8:30',
+  noon: '11:30-12:30',
+  evening: '18:30-19:30',
+  night: '21:00-22:00'
+}
 const periodOrder: Period[] = ['morning', 'noon', 'evening', 'night']
 const periodLabel = (p: string) => periodLabels[p as Period] || p
+const periodTime = (p: string) => periodTimes[p as Period] || ''
 
 const studentLabels: Record<Student, string> = {
   a: 'A同学',
@@ -446,6 +458,17 @@ useSEO({
 
 .post-view {
   padding: 0.5rem 0.25rem;
+}
+
+/* 最佳发布时间提示条 */
+.best-time-tip {
+  margin-bottom: 1.25rem;
+  padding: 0.6rem 1rem;
+  background: #fff0f3;
+  border-left: 3px solid #ff2442;
+  border-radius: 4px;
+  color: #d81e06;
+  font-size: 0.9rem;
 }
 
 .view-item {
