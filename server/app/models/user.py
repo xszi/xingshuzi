@@ -15,12 +15,12 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    def set_password(self, password):
+    def set_password(self, password_text):
         # Use pbkdf2:sha256 instead of scrypt for compatibility with Python 3.9.6
-        self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
+        self.password = generate_password_hash(password_text, method='pbkdf2:sha256')
     
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    def check_password(self, password_text):
+        return check_password_hash(self.password, password_text)
 
     def to_dict(self):
         return {

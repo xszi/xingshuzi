@@ -1,0 +1,17 @@
+#!/bin/bash
+echo "快速检查后端数据库连接"
+echo "======================================"
+echo ""
+echo "在ECS上执行以下命令："
+echo ""
+echo "# 方法1: 查看API日志"
+echo "docker logs xingshuzi-api | tail -20"
+echo ""
+echo "# 方法2: 测试API接口"
+echo "curl http://localhost:5001/api/home/banners"
+echo ""
+echo "# 方法3: 检查环境变量"
+echo "docker exec xingshuzi-api env | grep MYSQL"
+echo ""
+echo "# 方法4: Python测试连接"
+echo 'docker exec xingshuzi-api python3 -c "import pymysql; conn=pymysql.connect(host=\"120.76.247.123\",user=\"root\",password=\"MyStrongRootPassword123\",database=\"xingshuzi\"); print(\"连接成功\"); conn.close()"'

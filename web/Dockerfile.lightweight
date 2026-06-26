@@ -5,7 +5,7 @@ WORKDIR /app
 # 复制package文件
 COPY package*.json ./
 
-# 使用淘宝npm镜像加速（国内部署）
+# 使用淘宝npm镜像加速
 RUN npm config set registry https://registry.npmmirror.com
 
 # 安装依赖
@@ -16,8 +16,9 @@ COPY . .
 
 # 设置环境变量
 ENV NUXT_PUBLIC_API_BASE=http://120.76.247.123:5001/api
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# 构建Nuxt应用
+# 构建Nuxt应用（减少内存使用）
 RUN npm run build
 
 # 生产环境镜像
@@ -28,6 +29,13 @@ WORKDIR /app
 # 复制构建产物
 COPY --from=builder /app/.output /app/.output
 
+# 创建非root用户
+RUN addgroup -g 1000 appuser && \
+    adduser -D -u 1000 -G appuser appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
+
 # 暴露端口
 EXPOSE 3000
 
@@ -36,8 +44,6 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
 
-# 启动命令（使用node用户，Alpine镜像已内置）
-USER node
-
+# 启动命令
 CMD ["node", ".output/server/index.mjs"]
 
