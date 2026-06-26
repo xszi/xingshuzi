@@ -1,5 +1,7 @@
 from app import db
 from datetime import datetime
+from config.config import Config
+from app.utils.uploads import normalize_upload_url
 
 # 时段枚举：早 / 中 / 傍晚 / 晚
 PERIODS = ('morning', 'noon', 'evening', 'night')
@@ -63,7 +65,9 @@ class XhsPost(db.Model):
             'student': self.student or 'a',
             'period': self.period,
             'title': self.title or '',
-            'images': images,
+            'images': [
+                normalize_upload_url(u, Config.PUBLIC_BASE_URL) for u in images
+            ],
             'content': self.content or '',
             'products': products,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,

@@ -2,11 +2,12 @@ import os
 import json
 import uuid
 from datetime import datetime
-from flask import Blueprint, jsonify, request, current_app, url_for
+from flask import Blueprint, jsonify, request, current_app
 from werkzeug.utils import secure_filename
 from app import db
 from app.models.xhs_post import XhsPost, PERIODS, STUDENTS, PRODUCTS
 from app.utils.auth import admin_required
+from app.utils.uploads import build_upload_url, normalize_upload_url
 
 xhs_posts_bp = Blueprint('xhs_posts', __name__)
 
@@ -55,9 +56,10 @@ def upload_image():
     os.makedirs(save_dir, exist_ok=True)
     file.save(os.path.join(save_dir, secure_filename(filename)))
 
-    # 构造绝对访问 URL（基于当前请求域名）
+    # 使用配置的对外地址，避免存成 127.0.0.1
     rel_path = f'{sub_dir}/{filename}'
-    url = url_for('serve_upload', filename=rel_path, _external=True)
+    base_url = current_app.config.get('PUBLIC_BASE_URL', '')
+    url = build_upload_url(base_url, rel_path)
 
     return jsonify({'code': 200, 'msg': '上传成功', 'data': {'url': url}})
 
@@ -138,6 +140,8 @@ def save_post():
     images = data.get('images', [])
     if not isinstance(images, list):
         images = [images] if images else []
+    base_url = current_app.config.get('PUBLIC_BASE_URL', '')
+    images = [normalize_upload_url(u, base_url) for u in images]
     images_json = json.dumps(images, ensure_ascii=False)
 
     # 所挂商品：多选，至少选一个，且只能是预设的 5 个之一

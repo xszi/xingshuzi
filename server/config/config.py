@@ -22,6 +22,9 @@ class Config:
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', SECRET_KEY)
     JWT_ACCESS_TOKEN_EXPIRES = 3600 * 24  # 24 hours
 
+    # 对外可访问的后端根地址（用于生成 /uploads 图片 URL，避免存成 127.0.0.1）
+    PUBLIC_BASE_URL = os.getenv('PUBLIC_BASE_URL', 'http://120.76.247.123:5001').rstrip('/')
+
     # 文件上传配置
     # 上传根目录（绝对路径），默认为项目内 server/uploads
     UPLOAD_FOLDER = os.getenv(

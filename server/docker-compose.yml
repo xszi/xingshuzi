@@ -17,6 +17,7 @@ services:
       - MYSQL_DB=${MYSQL_DB}
       - SECRET_KEY=${SECRET_KEY}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-http://120.76.247.123:5001}
     networks:
       - xingshuzi-network
     volumes:
