@@ -30,10 +30,6 @@ logs
 .env.*
 !.env.example
 
-# 后端 server/ 是独立的 git 仓库（github.com/xszi/xingshuzi-back），
-# 由它自己单独管理，外层仓库不跟踪其内容。
-server/
-
 # 数据库备份（但不包括初始化脚本）
 *.sql
 !mysql-standalone/init.sql
