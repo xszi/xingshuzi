@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS `xhs_posts` (
   `post_date` date NOT NULL COMMENT '发布日期',
   `student` varchar(10) NOT NULL DEFAULT 'a' COMMENT '同学: a/b/c',
   `period` varchar(20) NOT NULL COMMENT '时段: morning/noon/evening/night',
+  `poster_text` varchar(200) DEFAULT NULL COMMENT '大字报文字',
   `title` varchar(200) DEFAULT NULL COMMENT '标题',
   `images` text COMMENT '配图(JSON数组)',
   `content` text COMMENT '文案',
@@ -161,6 +162,25 @@ END //
 DELIMITER ;
 CALL `migrate_xhs_posts_student`();
 DROP PROCEDURE IF EXISTS `migrate_xhs_posts_student`;
+
+-- 兼容升级：新增大字报文字字段
+DROP PROCEDURE IF EXISTS `migrate_xhs_posts_poster_text`;
+DELIMITER //
+CREATE PROCEDURE `migrate_xhs_posts_poster_text`()
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'xhs_posts'
+      AND COLUMN_NAME = 'poster_text'
+  ) THEN
+    ALTER TABLE `xhs_posts`
+      ADD COLUMN `poster_text` varchar(200) DEFAULT NULL COMMENT '大字报文字' AFTER `period`;
+  END IF;
+END //
+DELIMITER ;
+CALL `migrate_xhs_posts_poster_text`();
+DROP PROCEDURE IF EXISTS `migrate_xhs_posts_poster_text`;
 
 -- 提示：管理员账号需要运行 init_admin.py 来创建
 

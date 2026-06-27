@@ -28,6 +28,8 @@ class XhsPost(db.Model):
     student = db.Column(db.String(10), nullable=False, default='a')
     # 时段：morning(早) / noon(中) / evening(傍晚) / night(晚)
     period = db.Column(db.String(20), nullable=False)
+    # 大字报文字（配图上的醒目短句）
+    poster_text = db.Column(db.String(200))
     # 标题
     title = db.Column(db.String(200))
     # 配图：多张图片地址，存为 JSON 数组字符串
@@ -64,6 +66,7 @@ class XhsPost(db.Model):
             'post_date': self.post_date.strftime('%Y-%m-%d') if self.post_date else None,
             'student': self.student or 'a',
             'period': self.period,
+            'poster_text': self.poster_text or '',
             'title': self.title or '',
             'images': [
                 normalize_upload_url(u, Config.PUBLIC_BASE_URL) for u in images

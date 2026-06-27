@@ -46,16 +46,52 @@
             :label="studentLabel(group.student)"
             :name="group.student"
           >
-            <el-tabs v-model="activeTabByStudent[group.student]" class="period-tabs">
-              <el-tab-pane
+            <div class="period-tabs-wrap">
+              <div class="period-nav-scroll">
+                <button
+                  v-for="post in group.posts"
+                  :key="post.period"
+                  type="button"
+                  class="period-nav-item"
+                  :class="{ 'is-active': activeTabByStudent[group.student] === post.period }"
+                  @click="selectPeriod(group.student, post.period, $event)"
+                >
+                  <span class="period-nav-name">{{ periodLabel(post.period) }}</span>
+                  <span class="period-nav-time">{{ periodTime(post.period) }}</span>
+                </button>
+              </div>
+
+              <div
                 v-for="post in group.posts"
-                :key="post.period"
-                :label="`${periodLabel(post.period)} ${periodTime(post.period)}`"
-                :name="post.period"
+                :key="'panel-' + post.period"
+                v-show="activeTabByStudent[group.student] === post.period"
+                class="period-panel"
               >
                 <div class="post-view">
                   <div class="best-time-tip">
                     🕐 最佳发布时间：{{ periodLabel(post.period) }} {{ periodTime(post.period) }}
+                  </div>
+
+                  <div v-if="post.posterText" class="view-item">
+                    <div class="view-label-row">
+                      <span class="view-label">大字报文字</span>
+                      <el-button
+                        class="copy-btn"
+                        type="primary"
+                        size="small"
+                        plain
+                        @click="copyText(post.posterText, '大字报文字')"
+                      >
+                        点击复制
+                      </el-button>
+                    </div>
+                    <p
+                      class="view-text poster-text copyable"
+                      title="点击复制大字报文字"
+                      @click="copyText(post.posterText, '大字报文字')"
+                    >
+                      {{ post.posterText }}
+                    </p>
                   </div>
 
                   <div v-if="post.title" class="view-item">
@@ -137,8 +173,8 @@
                     </div>
                   </div>
                 </div>
-              </el-tab-pane>
-            </el-tabs>
+              </div>
+            </div>
           </el-tab-pane>
         </el-tabs>
       </el-dialog>
@@ -154,7 +190,7 @@
             <span v-if="previewImages.length > 1" class="viewer-counter">
               {{ previewIndex + 1 }} / {{ previewImages.length }}
             </span>
-            <span v-if="isMobile" class="viewer-tip">长按图片保存到相册</span>
+            <span v-if="isMobile" class="viewer-tip">左右滑动切换 · 长按保存</span>
             <div class="viewer-actions">
               <button
                 v-if="isMobile"
@@ -175,33 +211,40 @@
             </div>
           </div>
 
-          <button
-            v-if="previewImages.length > 1"
-            type="button"
-            class="viewer-nav viewer-prev"
-            aria-label="上一张"
-            @click.stop="shiftPreview(-1)"
+          <div
+            class="viewer-stage"
+            @touchstart.passive="onViewerTouchStart"
+            @touchend="onViewerTouchEnd"
           >
-            ‹
-          </button>
+            <button
+              v-if="previewImages.length > 1"
+              type="button"
+              class="viewer-nav viewer-prev"
+              aria-label="上一张"
+              @click.stop="shiftPreview(-1)"
+            >
+              ‹
+            </button>
 
-          <img
-            v-if="previewImages[previewIndex]"
-            :src="previewImages[previewIndex]"
-            class="viewer-img"
-            alt="配图预览"
-            @click.stop
-          />
+            <img
+              v-if="previewImages[previewIndex]"
+              :key="previewIndex"
+              :src="previewImages[previewIndex]"
+              class="viewer-img"
+              alt="配图预览"
+              @click.stop
+            />
 
-          <button
-            v-if="previewImages.length > 1"
-            type="button"
-            class="viewer-nav viewer-next"
-            aria-label="下一张"
-            @click.stop="shiftPreview(1)"
-          >
-            ›
-          </button>
+            <button
+              v-if="previewImages.length > 1"
+              type="button"
+              class="viewer-nav viewer-next"
+              aria-label="下一张"
+              @click.stop="shiftPreview(1)"
+            >
+              ›
+            </button>
+          </div>
         </div>
       </Teleport>
     </ClientOnly>
@@ -223,6 +266,7 @@ interface PostView {
   id: number
   student: Student
   period: Period
+  posterText: string
   title: string
   images: string[]
   content: string
@@ -245,6 +289,12 @@ const periodTimes: Record<Period, string> = {
 const periodOrder: Period[] = ['morning', 'noon', 'evening', 'night']
 const periodLabel = (p: string) => periodLabels[p as Period] || p
 const periodTime = (p: string) => periodTimes[p as Period] || ''
+
+const selectPeriod = (student: Student, period: Period, event?: Event) => {
+  activeTabByStudent[student] = period
+  const btn = event?.currentTarget as HTMLElement | undefined
+  btn?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+}
 
 const studentOrder = STUDENT_ORDER
 
@@ -325,6 +375,41 @@ const shiftPreview = (delta: number) => {
   previewIndex.value = (previewIndex.value + delta + total) % total
 }
 
+const SWIPE_THRESHOLD = 48
+const SWIPE_MAX_VERTICAL = 72
+
+const swipeStart = { x: 0, y: 0, active: false }
+
+const onViewerTouchStart = (e: TouchEvent) => {
+  if (previewImages.value.length <= 1) return
+  const touch = e.touches[0]
+  if (!touch) return
+  swipeStart.x = touch.clientX
+  swipeStart.y = touch.clientY
+  swipeStart.active = true
+}
+
+const onViewerTouchEnd = (e: TouchEvent) => {
+  if (!swipeStart.active || previewImages.value.length <= 1) return
+  swipeStart.active = false
+  const touch = e.changedTouches[0]
+  if (!touch) return
+  const dx = touch.clientX - swipeStart.x
+  const dy = touch.clientY - swipeStart.y
+  // 纵向滑动为主时不切换（避免与页面滚动冲突）
+  if (Math.abs(dy) > SWIPE_MAX_VERTICAL && Math.abs(dy) > Math.abs(dx)) return
+  if (Math.abs(dx) < SWIPE_THRESHOLD) return
+  // 左滑下一张，右滑上一张
+  shiftPreview(dx < 0 ? 1 : -1)
+}
+
+const onPreviewKeydown = (e: KeyboardEvent) => {
+  if (!previewVisible.value) return
+  if (e.key === 'ArrowLeft') shiftPreview(-1)
+  else if (e.key === 'ArrowRight') shiftPreview(1)
+  else if (e.key === 'Escape') closeImagePreview()
+}
+
 const savePreviewImage = async () => {
   const url = previewImages.value[previewIndex.value]
   if (!url) return
@@ -345,6 +430,12 @@ const savePreviewImage = async () => {
 watch(previewVisible, (visible) => {
   if (typeof document === 'undefined') return
   document.body.style.overflow = visible ? 'hidden' : ''
+  if (visible) {
+    window.addEventListener('keydown', onPreviewKeydown)
+  } else {
+    window.removeEventListener('keydown', onPreviewKeydown)
+    swipeStart.active = false
+  }
 })
 
 const monthKey = (d: Date) =>
@@ -377,6 +468,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateIsMobile)
+  window.removeEventListener('keydown', onPreviewKeydown)
   if (typeof document !== 'undefined') {
     document.body.style.overflow = ''
   }
@@ -399,6 +491,7 @@ const loadDate = async (date: string) => {
       id: item.id,
       student: (item.student || 'a') as Student,
       period: item.period,
+      posterText: item.poster_text || '',
       title: item.title || '',
       images: item.images || [],
       content: item.content || '',
@@ -601,6 +694,15 @@ useSEO({
   border-color: #c7cffb;
 }
 
+.poster-text {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #ff2442;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
 .view-content {
   white-space: pre-wrap;
 }
@@ -661,10 +763,21 @@ useSEO({
   z-index: 10000;
   background: rgba(0, 0, 0, 0.92);
   display: flex;
+  flex-direction: column;
+  padding: 56px 0 24px;
+  touch-action: none;
+}
+
+.viewer-stage {
+  position: relative;
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 56px 12px 24px;
-  touch-action: manipulation;
+  width: 100%;
+  min-height: 0;
+  padding: 0 12px;
+  touch-action: pan-y pinch-zoom;
 }
 
 .viewer-toolbar {
@@ -754,11 +867,77 @@ useSEO({
   user-select: auto;
   -webkit-user-select: auto;
   pointer-events: auto;
+  animation: viewerFadeIn 0.18s ease;
 }
 
-.period-tabs :deep(.el-tabs__item) {
-  font-size: 1.05rem;
-  padding: 0 1.5rem;
+@keyframes viewerFadeIn {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.period-tabs-wrap {
+  margin-bottom: 0.5rem;
+}
+
+/* 时段标签：横向滑动，手指左右划即可 */
+.period-nav-scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  padding: 0.25rem 0 0.75rem;
+  margin-bottom: 0.75rem;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+
+.period-nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.period-nav-item {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  background: #fff;
+  color: #606266;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.period-nav-item.is-active {
+  border-color: #667eea;
+  background: #eef1ff;
+  color: #667eea;
+}
+
+.period-nav-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.period-nav-time {
+  font-size: 0.72rem;
+  color: #909399;
+  white-space: nowrap;
+}
+
+.period-nav-item.is-active .period-nav-time {
+  color: #667eea;
 }
 
 .student-tabs > :deep(.el-tabs__header) {
@@ -884,21 +1063,45 @@ useSEO({
     aspect-ratio: 1 / 1;
   }
 
-  .period-tabs :deep(.el-tabs__item) {
-    font-size: 0.95rem;
-    padding: 0 0.9rem;
+  /* 号1-4 标签：隐藏箭头，支持手指滑动 */
+  .student-tabs > :deep(.el-tabs__nav-prev),
+  .student-tabs > :deep(.el-tabs__nav-next) {
+    display: none;
   }
 
-  /* 同学 / 时段 tab 在窄屏可横向滚动，避免溢出换行 */
-  .student-tabs > :deep(.el-tabs__header .el-tabs__nav-wrap),
-  .period-tabs :deep(.el-tabs__nav-wrap) {
-    overflow-x: auto;
+  .student-tabs > :deep(.el-tabs__nav-wrap) {
+    overflow: visible;
+    padding: 0;
+  }
+
+  .student-tabs > :deep(.el-tabs__nav-scroll) {
+    overflow-x: auto !important;
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    scrollbar-width: none;
   }
 
-  .student-tabs > :deep(.el-tabs__header .el-tabs__nav),
-  .period-tabs :deep(.el-tabs__nav) {
+  .student-tabs > :deep(.el-tabs__nav-scroll::-webkit-scrollbar) {
+    display: none;
+  }
+
+  .student-tabs > :deep(.el-tabs__nav) {
     white-space: nowrap;
+    transform: none !important;
+  }
+
+  .period-nav-item {
+    padding: 0.4rem 0.75rem;
+  }
+
+  .period-nav-name {
+    font-size: 0.88rem;
+  }
+
+  .period-nav-time {
+    font-size: 0.68rem;
   }
 }
 
@@ -907,8 +1110,8 @@ useSEO({
     height: 44px;
   }
 
-  .period-tabs :deep(.el-tabs__item) {
-    padding: 0 0.6rem;
+  .period-nav-item {
+    padding: 0.35rem 0.6rem;
   }
 }
 </style>

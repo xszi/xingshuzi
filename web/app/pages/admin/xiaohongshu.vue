@@ -67,6 +67,16 @@
                   </div>
 
                   <div class="form-item">
+                    <label>大字报文字</label>
+                    <el-input
+                      v-model="forms[stu.name][tab.name].posterText"
+                      placeholder="请输入大字报文字（显示在配图上的醒目短句）"
+                      maxlength="50"
+                      show-word-limit
+                    />
+                  </div>
+
+                  <div class="form-item">
                     <label>标题</label>
                     <el-input
                       v-model="forms[stu.name][tab.name].title"
@@ -185,6 +195,7 @@ type Period = 'morning' | 'noon' | 'evening' | 'night'
 
 interface PostForm {
   id: number | null
+  posterText: string
   title: string
   images: string[]
   content: string
@@ -221,6 +232,7 @@ const markedDays = ref<Set<string>>(new Set())
 
 const emptyForm = (): PostForm => ({
   id: null,
+  posterText: '',
   title: '',
   images: [],
   content: '',
@@ -355,6 +367,7 @@ const loadDate = async (date: string) => {
       const p = item.period as Period
       if (forms[stu] && forms[stu][p]) {
         forms[stu][p].id = item.id
+        forms[stu][p].posterText = item.poster_text || ''
         forms[stu][p].title = item.title || ''
         forms[stu][p].images = Array.isArray(item.images) ? item.images : []
         forms[stu][p].content = item.content || ''
@@ -379,6 +392,7 @@ const handleSave = async (student: Student, period: Period) => {
       date: selectedDate.value,
       student,
       period,
+      poster_text: form.posterText,
       title: form.title,
       images: form.images,
       content: form.content,

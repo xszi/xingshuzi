@@ -119,7 +119,7 @@ def get_marked_days():
 def save_post():
     """保存某一天某位同学某时段的发布内容（不存在则新建，存在则更新）。
 
-    请求体: { date, student, period, title, images(数组), content, products(数组) }
+    请求体: { date, student, period, poster_text, title, images(数组), content, products(数组) }
     """
     data = request.get_json() or {}
 
@@ -162,6 +162,7 @@ def save_post():
         post = XhsPost(post_date=post_date, student=student, period=period)
         db.session.add(post)
 
+    post.poster_text = data.get('poster_text', '')
     post.title = data.get('title', '')
     post.images = images_json
     post.content = data.get('content', '')
