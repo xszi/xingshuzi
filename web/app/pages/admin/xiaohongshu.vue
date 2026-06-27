@@ -122,7 +122,7 @@
                   </div>
 
                   <div class="form-item">
-                    <label>所挂商品（可多选，至少选一个）</label>
+                    <label>所挂商品（选填，可多选）</label>
                     <el-select
                       v-model="forms[stu.name][tab.name].products"
                       multiple
@@ -355,10 +355,6 @@ const loadDate = async (date: string) => {
 
 const handleSave = async (student: Student, period: Period) => {
   const form = forms[student][period]
-  if (!form.products.length) {
-    ElMessage.warning('请至少选择一个所挂商品')
-    return
-  }
   saving.value = true
   try {
     const res = await api.post<any>('/xhs-posts', {

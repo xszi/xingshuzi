@@ -144,14 +144,12 @@ def save_post():
     images = [normalize_upload_url(u, base_url) for u in images]
     images_json = json.dumps(images, ensure_ascii=False)
 
-    # 所挂商品：多选，至少选一个，且只能是预设的 5 个之一
+    # 所挂商品：多选，可为空，且只能是预设的 5 个之一
     products = data.get('products', [])
     if not isinstance(products, list):
         products = [products] if products else []
     # 去重并保持可选项的固定顺序
     products = [p for p in PRODUCTS if p in products]
-    if not products:
-        return jsonify({'code': 400, 'msg': f'所挂商品至少选一个，需为 {list(PRODUCTS)} 之一'}), 400
     invalid = [p for p in data.get('products', []) if p not in PRODUCTS]
     if invalid:
         return jsonify({'code': 400, 'msg': f'所挂商品包含无效项: {invalid}'}), 400

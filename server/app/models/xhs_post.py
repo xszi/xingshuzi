@@ -9,7 +9,7 @@ PERIODS = ('morning', 'noon', 'evening', 'night')
 # 同学枚举：A / B / C 三位同学
 STUDENTS = ('a', 'b', 'c')
 
-# 所挂商品可选项（多选，至少选一个）
+# 所挂商品可选项（多选，可为空）
 PRODUCTS = ('考研', '雅思', '六级', '四级', '小学语法学习纸')
 
 
