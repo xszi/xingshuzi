@@ -62,12 +62,13 @@
                     <div class="view-label-row">
                       <span class="view-label">标题</span>
                       <el-button
+                        class="copy-btn"
                         type="primary"
                         size="small"
-                        text
+                        plain
                         @click="copyText(post.title, '标题')"
                       >
-                        一键复制
+                        点击复制
                       </el-button>
                     </div>
                     <p
@@ -110,12 +111,13 @@
                     <div class="view-label-row">
                       <span class="view-label">文案</span>
                       <el-button
+                        class="copy-btn"
                         type="primary"
                         size="small"
-                        text
+                        plain
                         @click="copyText(post.content, '文案')"
                       >
-                        一键复制
+                        点击复制
                       </el-button>
                     </div>
                     <p
@@ -251,7 +253,7 @@ const onImgError = (e: Event) => {
   ;(e.target as HTMLImageElement).style.display = 'none'
 }
 
-// 一键复制文本（标题 / 文案）
+// 点击复制文本（标题 / 文案）
 const copyText = async (text: string, label: string) => {
   if (!text) return
   try {
@@ -507,6 +509,25 @@ useSEO({
 
 .view-label-row .view-label {
   margin-bottom: 0;
+}
+
+.copy-btn {
+  --el-button-hover-text-color: #fff;
+  --el-button-hover-bg-color: #667eea;
+  --el-button-hover-border-color: #667eea;
+  padding: 4px 14px;
+  height: 28px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-radius: 999px;
+  border-color: #d0d7ff;
+  color: #667eea;
+  background: #f7f8fc;
+  flex-shrink: 0;
+}
+
+.copy-btn:active {
+  transform: scale(0.97);
 }
 
 .view-text {
