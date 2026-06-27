@@ -7,7 +7,7 @@ from app.utils.uploads import normalize_upload_url
 PERIODS = ('morning', 'noon', 'evening', 'night')
 
 # 同学枚举：A / B / C 三位同学
-STUDENTS = ('a', 'b', 'c')
+STUDENTS = ('a', 'b', 'c', 'd')
 
 # 所挂商品可选项（多选，可为空）
 PRODUCTS = ('考研', '雅思', '六级', '四级', '小学语法学习纸')
@@ -24,7 +24,7 @@ class XhsPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # 发布日期，格式 YYYY-MM-DD
     post_date = db.Column(db.Date, nullable=False)
-    # 同学：a(A同学) / b(B同学) / c(C同学)
+    # 账号：a(号1) / b(号2) / c(号3) / d(号4)
     student = db.Column(db.String(10), nullable=False, default='a')
     # 时段：morning(早) / noon(中) / evening(傍晚) / night(晚)
     period = db.Column(db.String(20), nullable=False)

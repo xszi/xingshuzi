@@ -4,7 +4,7 @@
       <el-alert
         title="发小红书内容管理"
         type="info"
-        description="点击日历中的某一天，可分别为「A同学 / B同学 / C同学」编辑各自「早上 / 中午 / 傍晚 / 晚上」四个时段的发布内容。红点表示该天已安排内容。"
+        description="点击日历中的某一天，可分别为「号1 / 号2 / 号3 / 号4」编辑各自「早上 / 中午 / 傍晚 / 晚上」四个时段的发布内容。红点表示该天已安排内容。"
         :closable="false"
         show-icon
       />
@@ -77,13 +77,14 @@
                   </div>
 
                   <div class="form-item">
-                    <label>配图（点击上传图片）</label>
+                    <label>配图（可多选，按选择顺序上传）</label>
                     <div class="image-uploader">
                       <div
                         v-for="(img, i) in forms[stu.name][tab.name].images"
                         :key="img + i"
                         class="uploaded-thumb"
                       >
+                        <span class="thumb-order">{{ i + 1 }}</span>
                         <img :src="img" class="thumb-img" @error="onImgError" />
                         <div class="thumb-mask" @click="removeImage(stu.name, tab.name, i)">
                           <span class="thumb-remove">删除</span>
@@ -91,6 +92,7 @@
                       </div>
 
                       <el-upload
+                        multiple
                         :show-file-list="false"
                         :before-upload="beforeUpload"
                         :http-request="(opt: any) => doUpload(stu.name, tab.name, opt)"
@@ -106,7 +108,7 @@
                         </div>
                       </el-upload>
                     </div>
-                    <p class="upload-hint">支持 jpg / png / gif / webp，单张不超过 10MB</p>
+                    <p class="upload-hint">支持 jpg / png / gif / webp，可多选，单张不超过 10MB，按选择顺序依次上传</p>
                   </div>
 
                   <div class="form-item">
@@ -168,6 +170,11 @@
 
 <script setup lang="ts">
 import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  type Student,
+  STUDENT_TABS,
+  STUDENT_ORDER
+} from '~/data/xhsStudents'
 
 definePageMeta({
   layout: 'admin',
@@ -175,7 +182,6 @@ definePageMeta({
 })
 
 type Period = 'morning' | 'noon' | 'evening' | 'night'
-type Student = 'a' | 'b' | 'c'
 
 interface PostForm {
   id: number | null
@@ -196,11 +202,7 @@ const periodTabs: { name: Period; label: string; time: string }[] = [
   { name: 'night', label: '晚上', time: '21:00-22:00' }
 ]
 
-const studentTabs: { name: Student; label: string }[] = [
-  { name: 'a', label: 'A同学' },
-  { name: 'b', label: 'B同学' },
-  { name: 'c', label: 'C同学' }
-]
+const studentTabs = STUDENT_TABS
 
 const currentDate = ref(new Date())
 const dialogVisible = ref(false)
@@ -209,8 +211,10 @@ const activeStudent = ref<Student>('a')
 const activeTab = ref<Period>('morning')
 const saving = ref(false)
 const deleting = ref(false)
-// 正在上传图片的「同学:时段」键（用于显示 loading），形如 "a:morning"
+// 正在上传图片的「账号:时段」键（用于显示 loading），形如 "a:morning"
 const uploadingKey = ref<string | null>(null)
+// 同一账号时段内按选择顺序串行上传
+const uploadQueues = new Map<string, Promise<void>>()
 
 // 有内容的日期集合，用于在日历格子上打点
 const markedDays = ref<Set<string>>(new Set())
@@ -231,11 +235,11 @@ const emptyStudentForms = (): Record<Period, PostForm> => ({
   night: emptyForm()
 })
 
-const forms = reactive<Record<Student, Record<Period, PostForm>>>({
-  a: emptyStudentForms(),
-  b: emptyStudentForms(),
-  c: emptyStudentForms()
-})
+const forms = reactive<Record<Student, Record<Period, PostForm>>>(
+  Object.fromEntries(
+    STUDENT_ORDER.map((s) => [s, emptyStudentForms()])
+  ) as Record<Student, Record<Period, PostForm>>
+)
 
 // 某位同学是否已安排任意时段内容（用于外层标签红点）
 const studentHasContent = (student: Student) =>
@@ -260,26 +264,40 @@ const beforeUpload = (file: File) => {
   return true
 }
 
-// 自定义上传：调用后端 /xhs-posts/upload，成功后把返回 URL 加入该同学该时段配图
-const doUpload = async (student: Student, period: Period, option: any) => {
-  uploadingKey.value = `${student}:${period}`
-  try {
-    const res = await api.upload<any>('/xhs-posts/upload', option.file)
-    if (res.code === 200 && res.data?.url) {
-      forms[student][period].images.push(res.data.url)
-      ElMessage.success('上传成功')
-      option.onSuccess?.(res)
-    } else {
-      ElMessage.error(res.msg || '上传失败')
-      option.onError?.(new Error(res.msg || '上传失败'))
+// 自定义上传：按选择顺序串行调用后端 /xhs-posts/upload
+const doUpload = (student: Student, period: Period, option: any) => {
+  const key = `${student}:${period}`
+  uploadingKey.value = key
+
+  const task = async () => {
+    try {
+      const res = await api.upload<any>('/xhs-posts/upload', option.file)
+      if (res.code === 200 && res.data?.url) {
+        forms[student][period].images.push(res.data.url)
+        option.onSuccess?.(res)
+      } else {
+        ElMessage.error(res.msg || '上传失败')
+        option.onError?.(new Error(res.msg || '上传失败'))
+      }
+    } catch (error: any) {
+      console.error('上传失败', error)
+      ElMessage.error(error.data?.msg || '上传失败，请确认已登录管理员账号')
+      option.onError?.(error)
     }
-  } catch (error: any) {
-    console.error('上传失败', error)
-    ElMessage.error(error.data?.msg || '上传失败，请确认已登录管理员账号')
-    option.onError?.(error)
-  } finally {
-    uploadingKey.value = null
   }
+
+  const prev = uploadQueues.get(key) || Promise.resolve()
+  const next = prev
+    .then(task)
+    .catch(() => {})
+    .finally(() => {
+      if (uploadQueues.get(key) === next) {
+        uploadQueues.delete(key)
+        if (uploadingKey.value === key) uploadingKey.value = null
+      }
+    })
+  uploadQueues.set(key, next)
+  return next
 }
 
 // 移除某张已上传的配图
@@ -565,6 +583,22 @@ const refreshDayMark = async (date: string) => {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.thumb-order {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 1;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: rgba(102, 126, 234, 0.92);
+  color: #fff;
+  font-size: 0.7rem;
+  line-height: 18px;
+  text-align: center;
 }
 
 .thumb-mask {

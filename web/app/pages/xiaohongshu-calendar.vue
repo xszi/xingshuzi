@@ -82,7 +82,7 @@
 
                   <div v-if="post.images && post.images.length" class="view-item">
                     <span class="view-label">配图</span>
-                    <p class="image-hint">📌 发小红书时请按从左到右的顺序依次上传</p>
+                    <p class="image-hint">📌 点击配图全屏预览，长按可保存到相册</p>
                     <div class="image-preview">
                       <div
                         v-for="(img, i) in post.images"
@@ -93,16 +93,9 @@
                         <img
                           :src="img"
                           class="preview-thumb"
-                          @error="onImgError"
+                          alt="配图"
+                          @click="openImagePreview(post.images, i)"
                         />
-                        <el-button
-                          class="thumb-download"
-                          type="primary"
-                          size="small"
-                          @click="downloadImage(img, i)"
-                        >
-                          {{ isMobile ? '存相册' : '下载' }}
-                        </el-button>
                       </div>
                     </div>
                   </div>
@@ -150,33 +143,81 @@
         </el-tabs>
       </el-dialog>
 
-      <!-- 移动端：无法调起分享时，大图 + 长按保存引导 -->
-      <el-dialog
-        v-model="savePreviewVisible"
-        title="保存到相册"
-        width="92%"
-        :align-center="true"
-        class="save-preview-dialog"
-        @closed="savePreviewUrl = ''"
-      >
-        <p class="save-preview-tip">长按下方图片，选择「存储到相册」或「保存图片」</p>
-        <img
-          v-if="savePreviewUrl"
-          :src="savePreviewUrl"
-          class="save-preview-img"
-          alt="配图"
-        />
-      </el-dialog>
+      <!-- 自定义全屏预览：原生 img，支持长按保存 -->
+      <Teleport to="body">
+        <div
+          v-if="previewVisible"
+          class="image-viewer"
+          @click.self="closeImagePreview"
+        >
+          <div class="viewer-toolbar">
+            <span v-if="previewImages.length > 1" class="viewer-counter">
+              {{ previewIndex + 1 }} / {{ previewImages.length }}
+            </span>
+            <span v-if="isMobile" class="viewer-tip">长按图片保存到相册</span>
+            <div class="viewer-actions">
+              <button
+                v-if="isMobile"
+                type="button"
+                class="viewer-save-btn"
+                @click.stop="savePreviewImage"
+              >
+                存相册
+              </button>
+              <button
+                type="button"
+                class="viewer-close-btn"
+                aria-label="关闭"
+                @click.stop="closeImagePreview"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <button
+            v-if="previewImages.length > 1"
+            type="button"
+            class="viewer-nav viewer-prev"
+            aria-label="上一张"
+            @click.stop="shiftPreview(-1)"
+          >
+            ‹
+          </button>
+
+          <img
+            v-if="previewImages[previewIndex]"
+            :src="previewImages[previewIndex]"
+            class="viewer-img"
+            alt="配图预览"
+            @click.stop
+          />
+
+          <button
+            v-if="previewImages.length > 1"
+            type="button"
+            class="viewer-nav viewer-next"
+            aria-label="下一张"
+            @click.stop="shiftPreview(1)"
+          >
+            ›
+          </button>
+        </div>
+      </Teleport>
     </ClientOnly>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
+import {
+  type Student,
+  STUDENT_ORDER,
+  studentLabel
+} from '~/data/xhsStudents'
 import { extFromImageUrl, saveImageToDevice } from '~/utils/saveImage'
 
 type Period = 'morning' | 'noon' | 'evening' | 'night'
-type Student = 'a' | 'b' | 'c'
 
 interface PostView {
   id: number
@@ -205,13 +246,7 @@ const periodOrder: Period[] = ['morning', 'noon', 'evening', 'night']
 const periodLabel = (p: string) => periodLabels[p as Period] || p
 const periodTime = (p: string) => periodTimes[p as Period] || ''
 
-const studentLabels: Record<Student, string> = {
-  a: 'A同学',
-  b: 'B同学',
-  c: 'C同学'
-}
-const studentOrder: Student[] = ['a', 'b', 'c']
-const studentLabel = (s: string) => studentLabels[s as Student] || s
+const studentOrder = STUDENT_ORDER
 
 const currentDate = ref(new Date())
 // 是否移动端（≤768px）：移动端弹窗全屏滚动展示
@@ -220,14 +255,15 @@ const dialogVisible = ref(false)
 const selectedDate = ref('')
 const activeStudent = ref<Student>('a')
 // 每位同学各自当前选中的时段标签
-const activeTabByStudent = reactive<Record<Student, Period>>({
-  a: 'morning',
-  b: 'morning',
-  c: 'morning'
-})
+const activeTabByStudent = reactive<Record<Student, Period>>(
+  Object.fromEntries(
+    STUDENT_ORDER.map((s) => [s, 'morning' as Period])
+  ) as Record<Student, Period>
+)
 const loading = ref(false)
-const savePreviewVisible = ref(false)
-const savePreviewUrl = ref('')
+const previewVisible = ref(false)
+const previewImages = ref<string[]>([])
+const previewIndex = ref(0)
 
 // 当天的发布内容（只读）
 const dayPosts = ref<PostView[]>([])
@@ -248,10 +284,6 @@ const studentGroups = computed(() =>
 
 // 有内容的日期集合，用于在日历格子上打点
 const markedDays = ref<Set<string>>(new Set())
-
-const onImgError = (e: Event) => {
-  ;(e.target as HTMLImageElement).style.display = 'none'
-}
 
 // 点击复制文本（标题 / 文案）
 const copyText = async (text: string, label: string) => {
@@ -277,28 +309,43 @@ const copyText = async (text: string, label: string) => {
   }
 }
 
-// 保存单张配图：移动端调系统分享存相册，桌面端直接下载
-const downloadImage = async (url: string, index: number) => {
-  const filename = `${selectedDate.value}_${index + 1}.${extFromImageUrl(url)}`
+const openImagePreview = (images: string[], index: number) => {
+  previewImages.value = images
+  previewIndex.value = index
+  previewVisible.value = true
+}
+
+const closeImagePreview = () => {
+  previewVisible.value = false
+}
+
+const shiftPreview = (delta: number) => {
+  const total = previewImages.value.length
+  if (total <= 1) return
+  previewIndex.value = (previewIndex.value + delta + total) % total
+}
+
+const savePreviewImage = async () => {
+  const url = previewImages.value[previewIndex.value]
+  if (!url) return
+  const filename = `${selectedDate.value}_${previewIndex.value + 1}.${extFromImageUrl(url)}`
   try {
     const result = await saveImageToDevice(url, filename)
     if (result === 'shared') {
-      ElMessage.success(`请在分享面板中选择「存储到相册」`)
-    } else if (result === 'preview') {
-      savePreviewUrl.value = url
-      savePreviewVisible.value = true
-    } else {
-      ElMessage.success(`第 ${index + 1} 张配图已开始下载`)
+      ElMessage.success('请在分享面板选择「存储到相册」')
+    } else if (result === 'downloaded') {
+      ElMessage.success('图片已开始下载')
     }
   } catch (error: unknown) {
-    // 用户取消分享不算失败
     if (error instanceof Error && error.name === 'AbortError') return
-    console.error('保存图片失败', error)
-    savePreviewUrl.value = url
-    savePreviewVisible.value = true
     ElMessage.info('请长按图片保存到相册')
   }
 }
+
+watch(previewVisible, (visible) => {
+  if (typeof document === 'undefined') return
+  document.body.style.overflow = visible ? 'hidden' : ''
+})
 
 const monthKey = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
@@ -330,6 +377,9 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateIsMobile)
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
 })
 
 const handleDateClick = async (data: { day: string }) => {
@@ -373,7 +423,7 @@ const loadDate = async (date: string) => {
 
 useSEO({
   title: '发小红书日历',
-  description: '查看小红书发布日历安排，按 A同学 / B同学 / C同学 分别展示各自早上、中午、傍晚、晚上四个时段的发布内容。'
+  description: '查看小红书发布日历安排，按 号1 / 号2 / 号3 / 号4 分别展示各自早上、中午、傍晚、晚上四个时段的发布内容。'
 })
 </script>
 
@@ -601,29 +651,109 @@ useSEO({
   object-fit: cover;
   border-radius: 6px;
   border: 1px solid #eee;
+  cursor: zoom-in;
 }
 
-.thumb-download {
-  width: 100%;
-  margin-top: 0.35rem;
+/* 全屏配图预览 */
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 12px 24px;
+  touch-action: manipulation;
 }
 
-.save-preview-tip {
-  margin: 0 0 0.75rem;
+.viewer-toolbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  color: #fff;
+  z-index: 2;
+}
+
+.viewer-counter {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.viewer-tip {
+  flex: 1;
   text-align: center;
-  color: #666;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  opacity: 0.85;
 }
 
-.save-preview-img {
-  display: block;
-  width: 100%;
-  max-height: 70vh;
+.viewer-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.viewer-save-btn {
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.viewer-close-btn {
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.viewer-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.viewer-prev {
+  left: 12px;
+}
+
+.viewer-next {
+  right: 12px;
+}
+
+.viewer-img {
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
-  border-radius: 8px;
-  user-select: none;
-  -webkit-user-select: none;
+  border-radius: 4px;
   -webkit-touch-callout: default;
+  touch-callout: default;
+  user-select: auto;
+  -webkit-user-select: auto;
+  pointer-events: auto;
 }
 
 .period-tabs :deep(.el-tabs__item) {
