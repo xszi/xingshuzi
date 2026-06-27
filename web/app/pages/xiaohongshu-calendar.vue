@@ -100,7 +100,7 @@
                           size="small"
                           @click="downloadImage(img, i)"
                         >
-                          下载
+                          {{ isMobile ? '存相册' : '下载' }}
                         </el-button>
                       </div>
                     </div>
@@ -147,12 +147,31 @@
           </el-tab-pane>
         </el-tabs>
       </el-dialog>
+
+      <!-- 移动端：无法调起分享时，大图 + 长按保存引导 -->
+      <el-dialog
+        v-model="savePreviewVisible"
+        title="保存到相册"
+        width="92%"
+        :align-center="true"
+        class="save-preview-dialog"
+        @closed="savePreviewUrl = ''"
+      >
+        <p class="save-preview-tip">长按下方图片，选择「存储到相册」或「保存图片」</p>
+        <img
+          v-if="savePreviewUrl"
+          :src="savePreviewUrl"
+          class="save-preview-img"
+          alt="配图"
+        />
+      </el-dialog>
     </ClientOnly>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
+import { extFromImageUrl, saveImageToDevice } from '~/utils/saveImage'
 
 type Period = 'morning' | 'noon' | 'evening' | 'night'
 type Student = 'a' | 'b' | 'c'
@@ -205,6 +224,8 @@ const activeTabByStudent = reactive<Record<Student, Period>>({
   c: 'morning'
 })
 const loading = ref(false)
+const savePreviewVisible = ref(false)
+const savePreviewUrl = ref('')
 
 // 当天的发布内容（只读）
 const dayPosts = ref<PostView[]>([])
@@ -254,32 +275,26 @@ const copyText = async (text: string, label: string) => {
   }
 }
 
-// 从 URL 推断文件扩展名，默认 jpg
-const extFromUrl = (url: string) => {
-  const match = url.split('?')[0].match(/\.(jpe?g|png|gif|webp|bmp)$/i)
-  return match ? match[1].toLowerCase() : 'jpg'
-}
-
-// 下载单张配图（按顺序命名为 1、2、3…，方便上传时对齐）
+// 保存单张配图：移动端调系统分享存相册，桌面端直接下载
 const downloadImage = async (url: string, index: number) => {
+  const filename = `${selectedDate.value}_${index + 1}.${extFromImageUrl(url)}`
   try {
-    const res = await fetch(url)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const blob = await res.blob()
-    const objectUrl = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = objectUrl
-    a.download = `${selectedDate.value}_${index + 1}.${extFromUrl(url)}`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(objectUrl)
-    ElMessage.success(`第 ${index + 1} 张配图已开始下载`)
-  } catch (error) {
-    console.error('下载图片失败', error)
-    // 跨域等情况下 fetch 可能失败，降级为新标签打开让用户手动保存
-    window.open(url, '_blank')
-    ElMessage.warning('已在新标签打开图片，请右键另存为')
+    const result = await saveImageToDevice(url, filename)
+    if (result === 'shared') {
+      ElMessage.success(`请在分享面板中选择「存储到相册」`)
+    } else if (result === 'preview') {
+      savePreviewUrl.value = url
+      savePreviewVisible.value = true
+    } else {
+      ElMessage.success(`第 ${index + 1} 张配图已开始下载`)
+    }
+  } catch (error: unknown) {
+    // 用户取消分享不算失败
+    if (error instanceof Error && error.name === 'AbortError') return
+    console.error('保存图片失败', error)
+    savePreviewUrl.value = url
+    savePreviewVisible.value = true
+    ElMessage.info('请长按图片保存到相册')
   }
 }
 
@@ -570,6 +585,24 @@ useSEO({
 .thumb-download {
   width: 100%;
   margin-top: 0.35rem;
+}
+
+.save-preview-tip {
+  margin: 0 0 0.75rem;
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.save-preview-img {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 8px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: default;
 }
 
 .period-tabs :deep(.el-tabs__item) {

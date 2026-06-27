@@ -26,6 +26,14 @@ def create_app():
             "allow_headers": ["Content-Type", "Authorization"],
             "expose_headers": ["Content-Type", "Authorization"],
             "supports_credentials": False
+        },
+        # 配图跨域 fetch / 分享保存需要
+        r"/uploads/*": {
+            "origins": "*",
+            "methods": ["GET", "OPTIONS"],
+            "allow_headers": ["Content-Type"],
+            "expose_headers": ["Content-Type"],
+            "supports_credentials": False
         }
     })
     
