@@ -14,6 +14,11 @@
   box-sizing: border-box;
 }
 
+html.is-mobile .week-wrapper,
+html.is-mobile .schedule-panel {
+  padding: 0.75rem;
+}
+
 html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.6;
@@ -23,6 +28,12 @@ html, body {
 
 #__nuxt {
   min-height: 100vh;
+}
+
+/* 确保复制/保存等提示浮层在最上层可见 */
+.el-message,
+.el-notification {
+  z-index: 10001 !important;
 }
 </style>
 

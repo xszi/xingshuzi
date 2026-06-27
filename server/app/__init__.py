@@ -39,6 +39,11 @@ def create_app():
     
     jwt.init_app(app)
 
+    # 启动时自动补齐数据库字段（避免部署后历史数据读不出）
+    with app.app_context():
+        from app.utils.db_migrate import ensure_xhs_posts_schema
+        ensure_xhs_posts_schema(db)
+
     # Register blueprints
     from app.routes.auth import auth_bp
     from app.routes.home import home_bp

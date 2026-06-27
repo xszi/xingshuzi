@@ -5,7 +5,7 @@
         <NuxtLink to="/" class="logo-link">
           <h1 class="logo">行书子</h1>
         </NuxtLink>
-        <NuxtLink to="/xiaohongshu-calendar" class="calendar-link">发小红书日历</NuxtLink>
+        <NuxtLink to="/xiaohongshu-calendar" class="calendar-link">发小红书安排</NuxtLink>
         <nav class="nav" role="navigation" aria-label="主导航">
           <NuxtLink to="/" class="nav-link">首页</NuxtLink>
           <NuxtLink to="/programming-course" class="nav-link">编程课程</NuxtLink>

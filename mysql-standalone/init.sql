@@ -95,7 +95,8 @@ CREATE TABLE IF NOT EXISTS `banner` (
 -- 小红书发布内容表（按日期 + 同学 + 时段）
 CREATE TABLE IF NOT EXISTS `xhs_posts` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `post_date` date NOT NULL COMMENT '发布日期',
+  `weekday` varchar(10) NOT NULL DEFAULT 'mon' COMMENT '星期: mon~sun',
+  `post_date` date DEFAULT NULL COMMENT '遗留字段，不再作为业务维度',
   `student` varchar(10) NOT NULL DEFAULT 'a' COMMENT '同学: a/b/c',
   `period` varchar(20) NOT NULL COMMENT '时段: morning/noon/evening/night',
   `poster_text` varchar(200) DEFAULT NULL COMMENT '大字报文字',
@@ -106,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `xhs_posts` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_date_student_period` (`post_date`, `student`, `period`)
+  UNIQUE KEY `uq_weekday_student_period` (`weekday`, `student`, `period`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 兼容升级：若 xhs_posts 表已存在但缺少 student 字段 / 旧唯一键，则补齐

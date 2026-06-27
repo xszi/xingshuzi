@@ -1,123 +1,111 @@
 <template>
   <div class="calendar-page">
-    <h2 class="page-title">发小红书日历</h2>
+    <h2 class="page-title">发小红书安排</h2>
 
-    <div class="calendar-wrapper">
-      <ClientOnly>
-        <el-calendar v-model="currentDate">
-          <template #date-cell="{ data }">
-            <div class="cell-content" @click="handleDateClick(data)">
-              <span class="cell-day">{{ data.day.split('-').slice(2).join('') }}</span>
-              <span v-if="markedDays.has(data.day)" class="cell-dot" />
-            </div>
-          </template>
-        </el-calendar>
-        <template #fallback>
-          <div class="calendar-loading">日历加载中...</div>
-        </template>
-      </ClientOnly>
+    <div class="week-wrapper">
+      <XhsWeekdayPicker
+        :selected-weekday="selectedWeekday"
+        :marked-weekdays="markedWeekdays"
+        @select="handleWeekdaySelect"
+      />
     </div>
 
-    <!-- 日期详情弹窗（只读展示） -->
-    <ClientOnly>
-      <el-dialog
-        v-model="dialogVisible"
-        :title="`${selectedDate} 发布安排`"
-        width="680px"
-        :align-center="!isMobile"
-        :fullscreen="isMobile"
-        class="post-dialog"
+    <div class="schedule-panel">
+      <h3 class="schedule-title">{{ weekdayTitle }} 发布安排</h3>
+
+      <div v-if="loading" class="panel-loading">加载中...</div>
+
+      <el-tabs
+        v-else
+        v-model="activeStudent"
+        type="card"
+        class="student-tabs"
       >
-        <div v-if="loading" class="dialog-loading">加载中...</div>
-
-        <div v-else-if="dayPosts.length === 0" class="dialog-empty">
-          当天暂无发布安排
-        </div>
-
-        <el-tabs
-          v-else
-          v-model="activeStudent"
-          type="card"
-          class="student-tabs"
+        <el-tab-pane
+          v-for="group in studentGroups"
+          :key="group.student"
+          :label="studentLabel(group.student)"
+          :name="group.student"
         >
-          <el-tab-pane
-            v-for="group in studentGroups"
-            :key="group.student"
-            :label="studentLabel(group.student)"
-            :name="group.student"
-          >
-            <div class="period-tabs-wrap">
-              <div class="period-nav-scroll">
-                <button
-                  v-for="post in group.posts"
-                  :key="post.period"
-                  type="button"
-                  class="period-nav-item"
-                  :class="{ 'is-active': activeTabByStudent[group.student] === post.period }"
-                  @click="selectPeriod(group.student, post.period, $event)"
-                >
-                  <span class="period-nav-name">{{ periodLabel(post.period) }}</span>
-                  <span class="period-nav-time">{{ periodTime(post.period) }}</span>
-                </button>
-              </div>
-
-              <div
+          <div class="period-tabs-wrap">
+            <div class="period-nav-scroll">
+              <button
                 v-for="post in group.posts"
-                :key="'panel-' + post.period"
-                v-show="activeTabByStudent[group.student] === post.period"
-                class="period-panel"
+                :key="post.period"
+                type="button"
+                class="period-nav-item"
+                :class="{ 'is-active': activeTabByStudent[group.student] === post.period }"
+                @click="selectPeriod(group.student, post.period, $event)"
               >
-                <div class="post-view">
-                  <div class="best-time-tip">
-                    🕐 最佳发布时间：{{ periodLabel(post.period) }} {{ periodTime(post.period) }}
-                  </div>
+                <span class="period-nav-name">{{ periodLabel(post.period) }}</span>
+                <span class="period-nav-time">{{ periodTime(post.period) }}</span>
+              </button>
+            </div>
 
-                  <div v-if="post.posterText" class="view-item">
-                    <div class="view-label-row">
-                      <span class="view-label">大字报文字</span>
-                      <el-button
-                        class="copy-btn"
-                        type="primary"
-                        size="small"
-                        plain
-                        @click="copyText(post.posterText, '大字报文字')"
-                      >
-                        点击复制
-                      </el-button>
-                    </div>
-                    <p
-                      class="view-text poster-text copyable"
-                      title="点击复制大字报文字"
-                      @click="copyText(post.posterText, '大字报文字')"
-                    >
-                      {{ post.posterText }}
-                    </p>
-                  </div>
+            <div
+              v-for="post in group.posts"
+              :key="'panel-' + post.period"
+              v-show="activeTabByStudent[group.student] === post.period"
+              class="period-panel"
+            >
+              <div class="post-view">
+                <div class="best-time-tip">
+                  🕐 最佳发布时间：{{ periodLabel(post.period) }} {{ periodTime(post.period) }}
+                </div>
 
-                  <div v-if="post.title" class="view-item">
-                    <div class="view-label-row">
-                      <span class="view-label">标题</span>
-                      <el-button
-                        class="copy-btn"
-                        type="primary"
-                        size="small"
-                        plain
-                        @click="copyText(post.title, '标题')"
-                      >
-                        点击复制
-                      </el-button>
-                    </div>
-                    <p
-                      class="view-text copyable"
-                      title="点击复制标题"
+                <div class="view-item">
+                  <div class="view-label-row">
+                    <span class="view-label">标题</span>
+                    <el-button
+                      v-if="post.title"
+                      class="copy-btn"
+                      type="primary"
+                      size="small"
+                      plain
                       @click="copyText(post.title, '标题')"
                     >
-                      {{ post.title }}
-                    </p>
+                      点击复制
+                    </el-button>
                   </div>
+                  <p
+                    v-if="post.title"
+                    class="view-text title-text copyable"
+                    title="点击复制标题"
+                    @click="copyText(post.title, '标题')"
+                  >
+                    {{ post.title }}
+                  </p>
+                  <p v-else class="view-text view-empty-block">暂无标题</p>
+                </div>
 
-                  <div v-if="post.images && post.images.length" class="view-item">
-                    <span class="view-label">配图</span>
+                <div class="view-item">
+                  <div class="view-label-row">
+                    <span class="view-label">大字报文字</span>
+                    <el-button
+                      v-if="post.posterText"
+                      class="copy-btn"
+                      type="primary"
+                      size="small"
+                      plain
+                      @click="copyText(post.posterText, '大字报文字')"
+                    >
+                      点击复制
+                    </el-button>
+                  </div>
+                  <p
+                    v-if="post.posterText"
+                    class="view-text poster-text copyable"
+                    title="点击复制大字报文字"
+                    @click="copyText(post.posterText, '大字报文字')"
+                  >
+                    {{ post.posterText }}
+                  </p>
+                  <p v-else class="view-text view-empty-block">暂无大字报文字</p>
+                </div>
+
+                <div class="view-item">
+                  <span class="view-label">配图</span>
+                  <template v-if="post.images && post.images.length">
                     <p class="image-hint">📌 点击配图全屏预览，长按可保存到相册</p>
                     <div class="image-preview">
                       <div
@@ -134,52 +122,59 @@
                         />
                       </div>
                     </div>
-                  </div>
+                  </template>
+                  <p v-else class="view-text view-empty-block">暂无配图</p>
+                </div>
 
-                  <div v-if="post.content" class="view-item">
-                    <div class="view-label-row">
-                      <span class="view-label">文案</span>
-                      <el-button
-                        class="copy-btn"
-                        type="primary"
-                        size="small"
-                        plain
-                        @click="copyText(post.content, '文案')"
-                      >
-                        点击复制
-                      </el-button>
-                    </div>
-                    <p
-                      class="view-text view-content copyable"
-                      title="点击复制文案"
+                <div class="view-item">
+                  <div class="view-label-row">
+                    <span class="view-label">文案</span>
+                    <el-button
+                      v-if="post.content"
+                      class="copy-btn"
+                      type="primary"
+                      size="small"
+                      plain
                       @click="copyText(post.content, '文案')"
                     >
-                      {{ post.content }}
-                    </p>
+                      点击复制
+                    </el-button>
                   </div>
+                  <p
+                    v-if="post.content"
+                    class="view-text view-content copyable"
+                    title="点击复制文案"
+                    @click="copyText(post.content, '文案')"
+                  >
+                    {{ post.content }}
+                  </p>
+                  <p v-else class="view-text view-empty-block">暂无文案</p>
+                </div>
 
-                  <div v-if="post.products && post.products.length" class="view-item">
-                    <span class="view-label">所挂商品</span>
-                    <div class="product-tags">
-                      <el-tag
-                        v-for="(prod, i) in post.products"
-                        :key="i"
-                        type="danger"
-                        effect="light"
-                        round
-                      >
-                        {{ prod }}
-                      </el-tag>
-                    </div>
+                <div class="view-item">
+                  <span class="view-label">所挂商品</span>
+                  <div v-if="post.products && post.products.length" class="product-tags">
+                    <el-tag
+                      v-for="(prod, i) in post.products"
+                      :key="i"
+                      type="danger"
+                      effect="light"
+                      round
+                    >
+                      {{ prod }}
+                    </el-tag>
                   </div>
+                  <p v-else class="view-text view-empty-block">暂无所挂商品</p>
                 </div>
               </div>
             </div>
-          </el-tab-pane>
-        </el-tabs>
-      </el-dialog>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
 
-      <!-- 自定义全屏预览：原生 img，支持长按保存 -->
+    <!-- 全屏配图预览 -->
+    <ClientOnly>
       <Teleport to="body">
         <div
           v-if="previewVisible"
@@ -259,6 +254,12 @@ import {
   studentLabel
 } from '~/data/xhsStudents'
 import { extFromImageUrl, saveImageToDevice } from '~/utils/saveImage'
+import { type Weekday, weekdayLabel } from '~/utils/xhsWeekday'
+import { fetchXhsPostsByWeekday } from '~/utils/xhsPostsApi'
+
+definePageMeta({
+  layout: 'plain'
+})
 
 type Period = 'morning' | 'noon' | 'evening' | 'night'
 
@@ -298,11 +299,15 @@ const selectPeriod = (student: Student, period: Period, event?: Event) => {
 
 const studentOrder = STUDENT_ORDER
 
-const currentDate = ref(new Date())
-// 是否移动端（≤768px）：移动端弹窗全屏滚动展示
-const isMobile = ref(false)
-const dialogVisible = ref(false)
-const selectedDate = ref('')
+const isMobile = useIsMobile()
+const {
+  selectedWeekday,
+  markedWeekdays,
+  loadMarkedWeekdays
+} = useXhsWeekday()
+
+const weekdayTitle = computed(() => weekdayLabel(selectedWeekday.value))
+
 const activeStudent = ref<Student>('a')
 // 每位同学各自当前选中的时段标签
 const activeTabByStudent = reactive<Record<Student, Period>>(
@@ -318,22 +323,29 @@ const previewIndex = ref(0)
 // 当天的发布内容（只读）
 const dayPosts = ref<PostView[]>([])
 
-// 按同学分组（只保留有内容的同学），各组内时段按固定顺序
-const studentGroups = computed(() =>
-  studentOrder
-    .map((student) => ({
-      student,
-      posts: dayPosts.value
-        .filter((p) => p.student === student)
-        .sort(
-          (a, b) => periodOrder.indexOf(a.period) - periodOrder.indexOf(b.period)
-        )
-    }))
-    .filter((g) => g.posts.length > 0)
-)
+const emptyPostView = (student: Student, period: Period): PostView => ({
+  id: 0,
+  student,
+  period,
+  posterText: '',
+  title: '',
+  images: [],
+  content: '',
+  products: []
+})
 
-// 有内容的日期集合，用于在日历格子上打点
-const markedDays = ref<Set<string>>(new Set())
+// 号1～4 × 早中晚四时段始终展示，无数据时用空占位
+const studentGroups = computed(() =>
+  studentOrder.map((student) => ({
+    student,
+    posts: periodOrder.map((period) => {
+      const found = dayPosts.value.find(
+        (p) => p.student === student && p.period === period
+      )
+      return found || emptyPostView(student, period)
+    })
+  }))
+)
 
 // 点击复制文本（标题 / 文案）
 const copyText = async (text: string, label: string) => {
@@ -352,7 +364,7 @@ const copyText = async (text: string, label: string) => {
       document.execCommand('copy')
       document.body.removeChild(ta)
     }
-    ElMessage.success(`${label}已复制`)
+    ElMessage.success('复制成功')
   } catch (error) {
     console.error('复制失败', error)
     ElMessage.error('复制失败，请手动选择文本复制')
@@ -413,7 +425,7 @@ const onPreviewKeydown = (e: KeyboardEvent) => {
 const savePreviewImage = async () => {
   const url = previewImages.value[previewIndex.value]
   if (!url) return
-  const filename = `${selectedDate.value}_${previewIndex.value + 1}.${extFromImageUrl(url)}`
+  const filename = `${selectedWeekday.value}_${previewIndex.value + 1}.${extFromImageUrl(url)}`
   try {
     const result = await saveImageToDevice(url, filename)
     if (result === 'shared') {
@@ -438,55 +450,15 @@ watch(previewVisible, (visible) => {
   }
 })
 
-const monthKey = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-
-// 加载当前月份有内容的日期，给日历打点
-const loadMarkedDays = async (d: Date) => {
-  try {
-    const res = await api.get<any>(`/xhs-posts/month?month=${monthKey(d)}`)
-    const dates: string[] = res.data?.dates || []
-    markedDays.value = new Set(dates)
-  } catch (error) {
-    console.error('加载月份标记失败', error)
-  }
+const handleWeekdaySelect = (weekday: Weekday) => {
+  selectedWeekday.value = weekday
 }
 
-watch(currentDate, (d) => {
-  if (d) loadMarkedDays(d)
-})
-
-const updateIsMobile = () => {
-  isMobile.value = window.innerWidth <= 768
-}
-
-onMounted(() => {
-  updateIsMobile()
-  window.addEventListener('resize', updateIsMobile)
-  loadMarkedDays(currentDate.value)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', updateIsMobile)
-  window.removeEventListener('keydown', onPreviewKeydown)
-  if (typeof document !== 'undefined') {
-    document.body.style.overflow = ''
-  }
-})
-
-const handleDateClick = async (data: { day: string }) => {
-  selectedDate.value = data.day
-  dialogVisible.value = true
-  await loadDate(data.day)
-}
-
-// 加载某日期已存在的内容（只读展示）
-const loadDate = async (date: string) => {
+const loadWeekday = async (weekday: Weekday) => {
   loading.value = true
   dayPosts.value = []
   try {
-    const res = await api.get<any>(`/xhs-posts?date=${date}`)
-    const list = Array.isArray(res.data) ? res.data : []
+    const list = await fetchXhsPostsByWeekday(weekday)
     dayPosts.value = list.map((item: any): PostView => ({
       id: item.id,
       student: (item.student || 'a') as Student,
@@ -497,15 +469,6 @@ const loadDate = async (date: string) => {
       content: item.content || '',
       products: Array.isArray(item.products) ? item.products : []
     }))
-
-    // 默认选中第一个有内容的同学，及其第一个有内容的时段
-    const groups = studentGroups.value
-    if (groups.length > 0) {
-      activeStudent.value = groups[0].student
-      for (const g of groups) {
-        activeTabByStudent[g.student] = g.posts[0].period
-      }
-    }
   } catch (error) {
     console.error('加载内容失败', error)
     ElMessage.error('加载内容失败')
@@ -514,9 +477,24 @@ const loadDate = async (date: string) => {
   }
 }
 
+watch(selectedWeekday, (weekday) => {
+  if (weekday) loadWeekday(weekday)
+}, { immediate: true })
+
+onMounted(() => {
+  loadMarkedWeekdays()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onPreviewKeydown)
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+})
+
 useSEO({
-  title: '发小红书日历',
-  description: '查看小红书发布日历安排，按 号1 / 号2 / 号3 / 号4 分别展示各自早上、中午、傍晚、晚上四个时段的发布内容。'
+  title: '发小红书安排',
+  description: '查看小红书发布安排，按周一至周日选择，为 号1 / 号2 / 号3 / 号4 分别展示早上、中午、傍晚、晚上四个时段的发布内容。'
 })
 </script>
 
@@ -533,83 +511,33 @@ useSEO({
   border-bottom: 3px solid #667eea;
 }
 
-.calendar-wrapper {
+.calendar-wrapper,
+.week-wrapper {
   background: white;
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.25rem;
 }
 
-.calendar-loading {
-  text-align: center;
-  padding: 4rem;
-  color: #999;
-  font-size: 1.2rem;
+.schedule-panel {
+  background: white;
+  padding: 1.5rem 2rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
-.cell-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  cursor: pointer;
-}
-
-.cell-day {
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-.cell-dot {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ff2442; /* 小红书红 */
-}
-
-/* 放大日历组件 */
-:deep(.el-calendar) {
-  --el-calendar-cell-width: 120px;
-}
-
-:deep(.el-calendar__header) {
-  padding: 16px 0;
-}
-
-:deep(.el-calendar__title) {
-  font-size: 1.6rem;
+.schedule-title {
+  margin: 0 0 1.25rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: #333;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #eef0f7;
 }
 
-:deep(.el-calendar-table thead th) {
-  font-size: 1.05rem;
-  padding: 14px 0;
-  color: #667eea;
-}
-
-:deep(.el-calendar-table .el-calendar-day) {
-  height: 100px;
-  padding: 10px;
-  transition: background 0.2s;
-}
-
-:deep(.el-calendar-table .el-calendar-day:hover) {
-  background: #f0f2ff;
-}
-
-:deep(.el-calendar-table td.is-selected .el-calendar-day) {
-  background: #e6e9ff;
-}
-
-/* 弹窗只读展示 */
-.dialog-loading,
-.dialog-empty {
+.panel-loading,
+.panel-empty {
   text-align: center;
   padding: 2.5rem 0;
   color: #999;
@@ -679,6 +607,15 @@ useSEO({
   line-height: 1.6;
 }
 
+.view-empty-block {
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  background: #fafafa;
+  border: 1px dashed #e4e7ed;
+  color: #bbb;
+  font-size: 0.92rem;
+}
+
 /* 可点击复制的文本块 */
 .copyable {
   cursor: pointer;
@@ -701,6 +638,13 @@ useSEO({
   color: #ff2442;
   text-align: center;
   letter-spacing: 0.02em;
+}
+
+.title-text {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.55;
+  color: #222;
 }
 
 .view-content {
@@ -967,76 +911,15 @@ useSEO({
     margin-bottom: 1rem;
   }
 
-  .calendar-wrapper {
+  .week-wrapper,
+  .schedule-panel {
     padding: 0.75rem;
     border-radius: 8px;
   }
 
-  :deep(.el-calendar__title) {
-    font-size: 1.1rem;
-  }
-
-  /* 移动端隐藏“上个月/下个月”按钮，只保留“今天”，避免按钮组溢出换行 */
-  :deep(.el-calendar__button-group .el-button-group > button:not(:nth-child(2))) {
-    display: none;
-  }
-
-  :deep(.el-calendar-table thead th) {
-    font-size: 0.8rem;
-    padding: 8px 0;
-  }
-
-  /* 缩小单元格高度，避免一屏放不下 */
-  :deep(.el-calendar-table .el-calendar-day) {
-    height: 52px;
-    padding: 4px;
-  }
-
-  .cell-day {
-    font-size: 0.85rem;
-  }
-
-  .cell-content {
-    justify-content: center;
-  }
-
-  .cell-dot {
-    top: 2px;
-    right: 2px;
-    width: 6px;
-    height: 6px;
-  }
-
-  /* 移动端：弹窗全屏 + 整屏滚动展示 */
-  :deep(.post-dialog.el-dialog.is-fullscreen) {
-    display: flex;
-    flex-direction: column;
-    border-radius: 0;
-  }
-
-  /* 头部固定在顶部，不随内容滚动 */
-  :deep(.post-dialog.is-fullscreen .el-dialog__header) {
-    flex: 0 0 auto;
-    margin: 0;
-    padding: 14px 16px;
-    border-bottom: 1px solid #eef0f7;
-    position: sticky;
-    top: 0;
-    background: #fff;
-    z-index: 2;
-  }
-
-  :deep(.post-dialog.is-fullscreen .el-dialog__title) {
+  .schedule-title {
     font-size: 1.05rem;
-    font-weight: 600;
-  }
-
-  /* body 占满剩余高度并纵向滚动 */
-  :deep(.post-dialog.is-fullscreen .el-dialog__body) {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    margin-bottom: 1rem;
   }
 
   .post-view {
@@ -1106,10 +989,6 @@ useSEO({
 }
 
 @media (max-width: 380px) {
-  :deep(.el-calendar-table .el-calendar-day) {
-    height: 44px;
-  }
-
   .period-nav-item {
     padding: 0.35rem 0.6rem;
   }

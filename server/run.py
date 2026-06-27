@@ -22,7 +22,9 @@ if __name__ == '__main__':
     # Get configuration from environment
     debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
     port = int(os.getenv('FLASK_PORT', '5000'))
-    
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    # debug=True 默认会开启 reloader，改代码时整进程重启；本地开发默认关闭，需热重载时设 FLASK_USE_RELOADER=true
+    use_reloader = os.getenv('FLASK_USE_RELOADER', 'false').lower() == 'true'
+
+    app.run(host='0.0.0.0', port=port, debug=debug, use_reloader=use_reloader)
 
 

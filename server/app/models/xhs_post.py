@@ -3,6 +3,9 @@ from datetime import datetime
 from config.config import Config
 from app.utils.uploads import normalize_upload_url
 
+# 星期枚举：周一 ~ 周日（循环发布模板，无具体日期）
+WEEKDAYS = ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun')
+
 # 时段枚举：早 / 中 / 傍晚 / 晚
 PERIODS = ('morning', 'noon', 'evening', 'night')
 
@@ -14,16 +17,18 @@ PRODUCTS = ('考研', '雅思', '六级', '四级', '小学语法学习纸')
 
 
 class XhsPost(db.Model):
-    """小红书发布内容：每条记录对应某一天某位同学某个时段的一篇内容。
+    """小红书发布内容：每条记录对应某个星期某位同学某个时段的一篇内容。
 
-    通过 (post_date, student, period) 唯一约束，
-    保证每天每位同学每个时段只有一篇。
+    通过 (weekday, student, period) 唯一约束，
+    保证每个星期每位同学每个时段只有一篇（每周循环使用）。
     """
     __tablename__ = 'xhs_posts'
 
     id = db.Column(db.Integer, primary_key=True)
-    # 发布日期，格式 YYYY-MM-DD
-    post_date = db.Column(db.Date, nullable=False)
+    # 星期：mon(周一) ~ sun(周日)
+    weekday = db.Column(db.String(10), nullable=False, default='mon')
+    # 遗留字段，不再作为业务维度
+    post_date = db.Column(db.Date, nullable=True)
     # 账号：a(号1) / b(号2) / c(号3) / d(号4)
     student = db.Column(db.String(10), nullable=False, default='a')
     # 时段：morning(早) / noon(中) / evening(傍晚) / night(晚)
@@ -42,7 +47,7 @@ class XhsPost(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (
-        db.UniqueConstraint('post_date', 'student', 'period', name='uq_date_student_period'),
+        db.UniqueConstraint('weekday', 'student', 'period', name='uq_weekday_student_period'),
     )
 
     def to_dict(self):
@@ -63,6 +68,7 @@ class XhsPost(db.Model):
 
         return {
             'id': self.id,
+            'weekday': self.weekday or 'mon',
             'post_date': self.post_date.strftime('%Y-%m-%d') if self.post_date else None,
             'student': self.student or 'a',
             'period': self.period,
