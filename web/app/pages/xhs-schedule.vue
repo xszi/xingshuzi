@@ -174,6 +174,17 @@ definePageMeta({
   layout: 'plain'
 })
 
+// 提交页禁止聚焦放大，避免 iOS 自动缩放后出现横向滚动
+useHead({
+  meta: [
+    {
+      key: 'viewport',
+      name: 'viewport',
+      content: 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover'
+    }
+  ]
+})
+
 const productOptions = ['考研', '雅思', '六级', '四级', '小学语法学习纸']
 
 const { submitPassword, rememberPassword } = useXhsSubmitPassword()
@@ -488,15 +499,14 @@ const handleSubmit = async () => {
   .form-actions {
     flex-direction: column-reverse;
     gap: 0.5rem;
-    position: sticky;
-    bottom: 0;
+    position: static;
     margin: 0;
     padding: 0.75rem 0 0;
     padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
     background: #fff;
     border-top: 1px solid #eef0f7;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
-    z-index: 10;
+    box-shadow: none;
+    z-index: 1;
   }
 
   .action-btn {

@@ -57,7 +57,7 @@ export default defineNuxtConfig({
       titleTemplate: '%s - 行书子',
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=5' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover', key: 'viewport' },
         { 
           name: 'description', 
           content: '行书子 - 资源分享平台，提供编程课程、音乐课程、音乐专辑、各类书籍、助农产品等优质资源。优质内容，值得信赖。' 

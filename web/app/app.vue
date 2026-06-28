@@ -19,6 +19,29 @@ html.is-mobile .schedule-panel {
   padding: 0.75rem;
 }
 
+/* iOS：输入框字号 < 16px 会聚焦时自动放大页面，导致横向溢出 */
+html.is-mobile {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html.is-mobile input,
+html.is-mobile textarea,
+html.is-mobile select,
+html.is-mobile .el-input__inner,
+html.is-mobile .el-textarea__inner,
+html.is-mobile .el-select__wrapper,
+html.is-mobile .el-select__placeholder,
+html.is-mobile .el-select__selected-item,
+html.is-mobile .el-input__wrapper {
+  font-size: 16px !important;
+  line-height: 1.5;
+}
+
+html.is-mobile body {
+  overscroll-behavior-x: none;
+}
+
 html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.6;
