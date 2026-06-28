@@ -29,6 +29,14 @@
           <span class="icon">🌾</span>
           <span>助农产品</span>
         </NuxtLink>
+        <NuxtLink to="/admin/xhs-submit-password" class="sidebar-link">
+          <span class="icon">🔑</span>
+          <span>提交密码</span>
+        </NuxtLink>
+        <NuxtLink to="/xhs-schedule" class="sidebar-link">
+          <span class="icon">➕</span>
+          <span>添加发布安排</span>
+        </NuxtLink>
         <NuxtLink to="/admin/xiaohongshu" class="sidebar-link">
           <span class="icon">📕</span>
           <span>发小红书</span>
@@ -74,6 +82,8 @@ const pageTitle = computed(() => {
   if (path.includes('music-albums')) return '音乐专辑管理'
   if (path.includes('books')) return '书籍管理'
   if (path.includes('agricultural-products')) return '助农产品管理'
+  if (path.includes('xhs-submit-password')) return '修改提交密码'
+  if (path.includes('xhs-schedule')) return '添加发布安排'
   if (path.includes('xiaohongshu')) return '发小红书内容管理'
   return '后台管理'
 })

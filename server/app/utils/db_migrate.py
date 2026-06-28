@@ -110,3 +110,16 @@ def ensure_xhs_posts_schema(db):
     except Exception as e:
         db.session.rollback()
         print(f'[migrate] xhs_posts schema check failed: {e}')
+
+
+def ensure_app_settings_schema(db):
+    """确保 app_settings 表存在并写入默认提交密码。"""
+    try:
+        from app.utils.app_settings import ensure_default_xhs_submit_password
+        inspector = inspect(db.engine)
+        if 'app_settings' not in inspector.get_table_names():
+            db.create_all()
+        ensure_default_xhs_submit_password()
+    except Exception as e:
+        db.session.rollback()
+        print(f'[migrate] app_settings check failed: {e}')

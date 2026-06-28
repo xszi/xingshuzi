@@ -75,27 +75,41 @@ export async function fetchXhsMarkedWeekdays(): Promise<Set<Weekday>> {
 }
 
 /** 保存发布内容（新 weekday 接口优先，旧 date 接口自动兼容） */
-export async function saveXhsPost(body: {
-  weekday: Weekday
-  student: string
-  period: string
-  poster_text: string
-  title: string
-  images: string[]
-  content: string
-  products: string[]
-}) {
+export async function saveXhsPost(
+  body: {
+    weekday: Weekday
+    student: string
+    period: string
+    poster_text: string
+    title: string
+    images: string[]
+    content: string
+    products: string[]
+  },
+  submitPassword?: string
+) {
+  const payload = {
+    ...body,
+    ...(submitPassword !== undefined ? { submit_password: submitPassword } : {})
+  }
   try {
-    const res = await api.post<any>('/xhs-posts', body)
+    const res = await api.post<any>('/xhs-posts', payload)
     if (res.code === 200) return res
   } catch (e: any) {
     if (!isLegacyApiError(e)) throw e
   }
 
-  const { weekday, ...rest } = body
+  const { weekday, ...rest } = payload
   return api.post<any>('/xhs-posts', {
     ...rest,
     date: nextDateForWeekday(weekday)
+  })
+}
+
+/** 修改小红书提交密码（仅管理员） */
+export async function changeXhsSubmitPassword(newPassword: string) {
+  return api.put<any>('/xhs-posts/submit-password', {
+    new_password: newPassword
   })
 }
 

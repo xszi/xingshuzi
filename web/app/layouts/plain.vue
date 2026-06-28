@@ -25,6 +25,7 @@
   width: 100%;
   margin: 0 auto;
   padding: 2rem;
+  box-sizing: border-box;
 }
 
 .footer {
@@ -43,7 +44,17 @@
 
 @media (max-width: 768px) {
   .main-content {
-    padding: 1rem;
+    padding: 0.75rem 0.75rem 1rem;
+    max-width: 100%;
+  }
+
+  .footer {
+    padding: 1rem 0;
+  }
+
+  .footer-content {
+    padding: 0 0.75rem;
+    font-size: 0.85rem;
   }
 }
 </style>

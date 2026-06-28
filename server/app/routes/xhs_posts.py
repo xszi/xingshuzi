@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, request, current_app
 from werkzeug.utils import secure_filename
 from app import db
 from app.models.xhs_post import XhsPost, PERIODS, STUDENTS, PRODUCTS, WEEKDAYS
-from app.utils.auth import admin_required
+from app.utils.auth import admin_required, xhs_submit_auth
 from app.utils.uploads import build_upload_url, normalize_upload_url
 
 xhs_posts_bp = Blueprint('xhs_posts', __name__)
@@ -26,7 +26,7 @@ def _parse_weekday(value):
 
 
 @xhs_posts_bp.route('/upload', methods=['POST'])
-@admin_required
+@xhs_submit_auth
 def upload_image():
     """上传单张配图，返回可访问的图片 URL。"""
     if 'file' not in request.files:
@@ -96,7 +96,7 @@ def get_marked_days():
 
 
 @xhs_posts_bp.route('', methods=['POST'])
-@admin_required
+@xhs_submit_auth
 def save_post():
     """保存某个星期某位同学某时段的发布内容。
 
@@ -167,3 +167,19 @@ def delete_post(post_id):
     db.session.delete(post)
     db.session.commit()
     return jsonify({'code': 200, 'msg': '删除成功'})
+
+
+@xhs_posts_bp.route('/submit-password', methods=['PUT'])
+@admin_required
+def change_submit_password():
+    """修改小红书提交密码（仅管理员）。"""
+    from app.utils.app_settings import set_xhs_submit_password
+
+    data = request.get_json() or {}
+    new_password = (data.get('new_password') or '').strip()
+
+    if len(new_password) < 4:
+        return jsonify({'code': 400, 'msg': '新提交密码至少 4 位'}), 400
+
+    set_xhs_submit_password(new_password)
+    return jsonify({'code': 200, 'msg': '提交密码已更新'})

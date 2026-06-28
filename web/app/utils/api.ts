@@ -61,7 +61,11 @@ export const api = {
     apiRequest<T>(url, { method: 'DELETE' }),
 
   // 上传文件（multipart/form-data，不能手动设置 Content-Type）
-  upload: <T = any>(url: string, file: File): Promise<T> => {
+  upload: <T = any>(
+    url: string,
+    file: File,
+    extraFields?: Record<string, string>
+  ): Promise<T> => {
     const config = useRuntimeConfig()
     const apiBase = config.public.apiBase
 
@@ -72,6 +76,11 @@ export const api = {
 
     const formData = new FormData()
     formData.append('file', file)
+    if (extraFields) {
+      for (const [key, value] of Object.entries(extraFields)) {
+        formData.append(key, value)
+      }
+    }
 
     const headers: Record<string, string> = {}
     if (token) {

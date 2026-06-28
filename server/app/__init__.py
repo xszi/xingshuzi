@@ -41,8 +41,9 @@ def create_app():
 
     # 启动时自动补齐数据库字段（避免部署后历史数据读不出）
     with app.app_context():
-        from app.utils.db_migrate import ensure_xhs_posts_schema
+        from app.utils.db_migrate import ensure_xhs_posts_schema, ensure_app_settings_schema
         ensure_xhs_posts_schema(db)
+        ensure_app_settings_schema(db)
 
     # Register blueprints
     from app.routes.auth import auth_bp
