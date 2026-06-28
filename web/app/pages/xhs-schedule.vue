@@ -95,34 +95,12 @@
         </div>
 
         <el-form-item label="配图（可多选，按选择顺序上传）">
-          <div class="image-uploader">
-            <div
-              v-for="(img, i) in form.images"
-              :key="img + i"
-              class="uploaded-thumb"
-            >
-              <span class="thumb-order">{{ i + 1 }}</span>
-              <img :src="img" class="thumb-img" alt="配图" />
-              <div class="thumb-mask" @click="removeImage(i)">
-                <span class="thumb-remove">删除</span>
-              </div>
-            </div>
-
-            <el-upload
-              multiple
-              :show-file-list="false"
-              :before-upload="beforeUpload"
-              :http-request="doUpload"
-              accept="image/*"
-              class="upload-trigger"
-            >
-              <div class="upload-box">
-                <span v-if="uploading" class="upload-loading">上传中...</span>
-                <span v-else class="upload-plus">＋</span>
-              </div>
-            </el-upload>
-          </div>
-          <p class="upload-hint">jpg / png / gif / webp，单张 ≤10MB</p>
+          <XhsImageUploader
+            v-model="form.images"
+            :uploading="uploading"
+            :before-upload="beforeUpload"
+            :http-request="doUpload"
+          />
         </el-form-item>
 
         <el-form-item label="所挂商品（选填，可多选）">
@@ -314,10 +292,6 @@ const doUpload = async (option: any) => {
   }
 }
 
-const removeImage = (index: number) => {
-  form.images.splice(index, 1)
-}
-
 const handleSubmit = async () => {
   if (!requireSubmitPassword()) return
   saving.value = true
@@ -353,12 +327,14 @@ const handleSubmit = async () => {
 <style scoped>
 .schedule-page {
   max-width: 960px;
+  width: 100%;
   margin: 0 auto;
   padding: 0.75rem 0 2rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .page-header {
@@ -392,6 +368,11 @@ const handleSubmit = async () => {
 .tip-card,
 .form-card {
   border-radius: 12px;
+  overflow: hidden;
+}
+
+.schedule-page :deep(.el-form-item__content) {
+  min-width: 0;
 }
 
 .tip-card :deep(.el-card__body),
@@ -446,101 +427,6 @@ const handleSubmit = async () => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 1rem;
-}
-
-.image-uploader {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.uploaded-thumb {
-  position: relative;
-  width: 90px;
-  height: 90px;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid #eee;
-  flex-shrink: 0;
-}
-
-.thumb-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.thumb-order {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  z-index: 1;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 9px;
-  background: rgba(102, 126, 234, 0.92);
-  color: #fff;
-  font-size: 0.7rem;
-  line-height: 18px;
-  text-align: center;
-}
-
-.thumb-mask {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
-  cursor: pointer;
-}
-
-.uploaded-thumb:hover .thumb-mask,
-.uploaded-thumb:active .thumb-mask {
-  opacity: 1;
-}
-
-.thumb-remove {
-  color: #fff;
-  font-size: 0.85rem;
-}
-
-.upload-trigger :deep(.el-upload) {
-  display: block;
-}
-
-.upload-box {
-  width: 90px;
-  height: 90px;
-  border: 1px dashed #c0c4cc;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background: #fafafa;
-  flex-shrink: 0;
-}
-
-.upload-plus {
-  font-size: 1.8rem;
-  color: #c0c4cc;
-}
-
-.upload-loading {
-  font-size: 0.8rem;
-  color: #999;
-}
-
-.upload-hint {
-  margin: 0.5rem 0 0;
-  font-size: 0.8rem;
-  color: #999;
-  line-height: 1.4;
 }
 
 .form-actions {
@@ -599,24 +485,13 @@ const handleSubmit = async () => {
     margin-top: 0.35rem;
   }
 
-  .uploaded-thumb,
-  .upload-box {
-    width: 76px;
-    height: 76px;
-  }
-
-  .thumb-mask {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.35);
-  }
-
   .form-actions {
     flex-direction: column-reverse;
     gap: 0.5rem;
     position: sticky;
     bottom: 0;
-    margin: 0 -0.75rem -0.75rem;
-    padding: 0.75rem;
+    margin: 0;
+    padding: 0.75rem 0 0;
     padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
     background: #fff;
     border-top: 1px solid #eef0f7;
@@ -627,13 +502,6 @@ const handleSubmit = async () => {
   .action-btn {
     width: 100%;
     margin: 0;
-  }
-}
-
-@media (hover: none) {
-  .thumb-mask {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.35);
   }
 }
 </style>

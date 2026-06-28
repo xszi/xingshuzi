@@ -24,10 +24,14 @@ html, body {
   line-height: 1.6;
   color: #333;
   background-color: #f9fafb;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 #__nuxt {
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* 确保复制/保存等提示浮层在最上层可见 */

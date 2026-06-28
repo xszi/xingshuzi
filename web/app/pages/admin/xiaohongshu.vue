@@ -86,37 +86,12 @@
                 <div class="form-row form-row--media">
                   <div class="form-item">
                     <label>配图（可多选，按选择顺序上传）</label>
-                    <div class="image-uploader">
-                      <div
-                        v-for="(img, i) in forms[stu.name][tab.name].images"
-                        :key="img + i"
-                        class="uploaded-thumb"
-                      >
-                        <span class="thumb-order">{{ i + 1 }}</span>
-                        <img :src="img" class="thumb-img" @error="onImgError" />
-                        <div class="thumb-mask" @click="removeImage(stu.name, tab.name, i)">
-                          <span class="thumb-remove">删除</span>
-                        </div>
-                      </div>
-
-                      <el-upload
-                        multiple
-                        :show-file-list="false"
-                        :before-upload="beforeUpload"
-                        :http-request="(opt: any) => doUpload(stu.name, tab.name, opt)"
-                        accept="image/*"
-                        class="upload-trigger"
-                      >
-                        <div class="upload-box">
-                          <span
-                            v-if="uploadingKey === `${stu.name}:${tab.name}`"
-                            class="upload-loading"
-                          >上传中...</span>
-                          <span v-else class="upload-plus">＋</span>
-                        </div>
-                      </el-upload>
-                    </div>
-                    <p class="upload-hint">jpg / png / gif / webp，单张 ≤10MB</p>
+                    <XhsImageUploader
+                      v-model="forms[stu.name][tab.name].images"
+                      :uploading="uploadingKey === `${stu.name}:${tab.name}`"
+                      :before-upload="beforeUpload"
+                      :http-request="(opt: any) => doUpload(stu.name, tab.name, opt)"
+                    />
                   </div>
 
                   <div class="form-item">
@@ -265,10 +240,6 @@ const forms = reactive<Record<Student, Record<Period, PostForm>>>(
 const studentHasContent = (student: Student) =>
   periodTabs.some((p) => forms[student][p.name].id)
 
-const onImgError = (e: Event) => {
-  ;(e.target as HTMLImageElement).style.display = 'none'
-}
-
 // 上传前校验：类型 + 大小
 const beforeUpload = (file: File) => {
   const isImage = file.type.startsWith('image/')
@@ -318,11 +289,6 @@ const doUpload = (student: Student, period: Period, option: any) => {
     })
   uploadQueues.set(key, next)
   return next
-}
-
-// 移除某张已上传的配图
-const removeImage = (student: Student, period: Period, index: number) => {
-  forms[student][period].images.splice(index, 1)
 }
 
 const resetForms = () => {
@@ -579,102 +545,6 @@ const refreshWeekdayMark = async (weekday: Weekday) => {
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: #333;
-}
-
-.image-uploader {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.uploaded-thumb {
-  position: relative;
-  width: 90px;
-  height: 90px;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid #eee;
-}
-
-.thumb-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.thumb-order {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  z-index: 1;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 9px;
-  background: rgba(102, 126, 234, 0.92);
-  color: #fff;
-  font-size: 0.7rem;
-  line-height: 18px;
-  text-align: center;
-}
-
-.thumb-mask {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
-  cursor: pointer;
-}
-
-.uploaded-thumb:hover .thumb-mask {
-  opacity: 1;
-}
-
-.thumb-remove {
-  color: #fff;
-  font-size: 0.85rem;
-}
-
-.upload-trigger :deep(.el-upload) {
-  display: block;
-}
-
-.upload-box {
-  width: 90px;
-  height: 90px;
-  border: 1px dashed #c0c4cc;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: border-color 0.2s;
-  background: #fafafa;
-}
-
-.upload-box:hover {
-  border-color: #667eea;
-}
-
-.upload-plus {
-  font-size: 1.8rem;
-  color: #c0c4cc;
-}
-
-.upload-loading {
-  font-size: 0.8rem;
-  color: #999;
-}
-
-.upload-hint {
-  margin: 0.5rem 0 0;
-  font-size: 0.8rem;
-  color: #999;
 }
 
 .form-actions {
