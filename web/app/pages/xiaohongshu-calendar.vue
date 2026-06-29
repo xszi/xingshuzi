@@ -55,31 +55,6 @@
 
                 <div class="view-item">
                   <div class="view-label-row">
-                    <span class="view-label">标题</span>
-                    <el-button
-                      v-if="post.title"
-                      class="copy-btn"
-                      type="primary"
-                      size="small"
-                      plain
-                      @click="copyText(post.title, '标题')"
-                    >
-                      点击复制
-                    </el-button>
-                  </div>
-                  <p
-                    v-if="post.title"
-                    class="view-text title-text copyable"
-                    title="点击复制标题"
-                    @click="copyText(post.title, '标题')"
-                  >
-                    {{ post.title }}
-                  </p>
-                  <p v-else class="view-text view-empty-block">暂无标题</p>
-                </div>
-
-                <div class="view-item">
-                  <div class="view-label-row">
                     <span class="view-label">大字报文字</span>
                     <el-button
                       v-if="post.posterText"
@@ -101,6 +76,31 @@
                     {{ post.posterText }}
                   </p>
                   <p v-else class="view-text view-empty-block">暂无大字报文字</p>
+                </div>
+
+                <div class="view-item">
+                  <div class="view-label-row">
+                    <span class="view-label">标题</span>
+                    <el-button
+                      v-if="post.title"
+                      class="copy-btn"
+                      type="primary"
+                      size="small"
+                      plain
+                      @click="copyText(post.title, '标题')"
+                    >
+                      点击复制
+                    </el-button>
+                  </div>
+                  <p
+                    v-if="post.title"
+                    class="view-text title-text copyable"
+                    title="点击复制标题"
+                    @click="copyText(post.title, '标题')"
+                  >
+                    {{ post.title }}
+                  </p>
+                  <p v-else class="view-text view-empty-block">暂无标题</p>
                 </div>
 
                 <div class="view-item">

@@ -160,7 +160,7 @@ const featuredResources = computed(() => {
 const siteUrl = config.public.siteUrl || 'https://xingshuzi.com'
 
 useSEO({
-  title: '行书子 - 资源分享平台',
+  title: '资源分享平台',
   description: '提供编程课程、音乐课程、音乐专辑、各类书籍、助农产品等优质资源。优质内容，值得信赖。',
   keywords: '资源分享,编程课程,音乐课程,音乐专辑,电子书,二手书,助农产品,在线学习,教育资源',
   url: siteUrl,

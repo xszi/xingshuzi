@@ -176,6 +176,7 @@ definePageMeta({
 
 // 提交页禁止聚焦放大，避免 iOS 自动缩放后出现横向滚动
 useHead({
+  title: '小红书收集',
   meta: [
     {
       key: 'viewport',

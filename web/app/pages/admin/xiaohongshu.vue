@@ -171,6 +171,10 @@ definePageMeta({
   middleware: 'admin'
 })
 
+useHead({
+  title: '内容管理'
+})
+
 type Period = 'morning' | 'noon' | 'evening' | 'night'
 
 interface PostForm {
