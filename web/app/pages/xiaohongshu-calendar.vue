@@ -1,6 +1,9 @@
 <template>
   <div class="calendar-page">
-    <h2 class="page-title">发小红书安排</h2>
+    <div class="page-header">
+      <h2 class="page-title">发小红书安排</h2>
+      <NuxtLink to="/xhs-schedule" class="header-link">添加发布安排</NuxtLink>
+    </div>
 
     <div class="week-wrapper">
       <XhsWeekdayPicker
@@ -503,12 +506,34 @@ useSEO({
   animation: fadeIn 0.5s ease-in;
 }
 
-.page-title {
-  font-size: 2.5rem;
-  color: #333;
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 3px solid #667eea;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  color: #333;
+  margin: 0;
+}
+
+.header-link {
+  color: #667eea;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-bottom: 0.35rem;
+}
+
+.header-link:hover {
+  text-decoration: underline;
 }
 
 .calendar-wrapper,
@@ -906,9 +931,17 @@ useSEO({
 
 /* 移动端适配 */
 @media (max-width: 768px) {
+  .page-header {
+    margin-bottom: 1rem;
+  }
+
   .page-title {
     font-size: 1.6rem;
-    margin-bottom: 1rem;
+  }
+
+  .header-link {
+    font-size: 0.9rem;
+    padding-bottom: 0.15rem;
   }
 
   .week-wrapper,
