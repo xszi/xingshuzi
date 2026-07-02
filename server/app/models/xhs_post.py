@@ -6,8 +6,9 @@ from app.utils.uploads import normalize_upload_url
 # 星期枚举：周一 ~ 周日（循环发布模板，无具体日期）
 WEEKDAYS = ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun')
 
-# 时段枚举：早 / 中 / 傍晚 / 晚
-PERIODS = ('morning', 'noon', 'evening', 'night')
+# 时段枚举：早 / 中 / 初晚 / 中晚 / 深晚
+# 注：evening/night 为历史枚举值，仅显示名调整为「初晚 / 中晚」，值保持不变
+PERIODS = ('morning', 'noon', 'evening', 'night', 'late_night')
 
 # 同学枚举：A / B / C 三位同学
 STUDENTS = ('a', 'b', 'c', 'd')

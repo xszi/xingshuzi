@@ -267,7 +267,7 @@ definePageMeta({
   layout: 'plain'
 })
 
-type Period = 'morning' | 'noon' | 'evening' | 'night'
+type Period = 'morning' | 'noon' | 'evening' | 'night' | 'late_night'
 
 interface PostView {
   id: number
@@ -284,17 +284,19 @@ interface PostView {
 const periodLabels: Record<Period, string> = {
   morning: '早上',
   noon: '中午',
-  evening: '傍晚',
-  night: '晚上'
+  evening: '初晚',
+  night: '中晚',
+  late_night: '深晚'
 }
 // 各时段最佳发布时间
 const periodTimes: Record<Period, string> = {
   morning: '7:30-8:30',
   noon: '11:30-12:30',
-  evening: '18:30-19:30',
-  night: '21:00-22:00'
+  evening: '19:30-21:00',
+  night: '21:30-22:30',
+  late_night: '22:30-23:30'
 }
-const periodOrder: Period[] = ['morning', 'noon', 'evening', 'night']
+const periodOrder: Period[] = ['morning', 'noon', 'evening', 'night', 'late_night']
 const periodLabel = (p: string) => periodLabels[p as Period] || p
 const periodTime = (p: string) => periodTimes[p as Period] || ''
 

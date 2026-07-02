@@ -175,7 +175,7 @@ useHead({
   title: '内容管理'
 })
 
-type Period = 'morning' | 'noon' | 'evening' | 'night'
+type Period = 'morning' | 'noon' | 'evening' | 'night' | 'late_night'
 
 interface PostForm {
   id: number | null
@@ -193,8 +193,9 @@ const productOptions = ['考研', '雅思', '六级', '四级', '小学语法学
 const periodTabs: { name: Period; label: string; time: string }[] = [
   { name: 'morning', label: '早上', time: '7:30-8:30' },
   { name: 'noon', label: '中午', time: '11:30-12:30' },
-  { name: 'evening', label: '傍晚', time: '18:30-19:30' },
-  { name: 'night', label: '晚上', time: '21:00-22:00' }
+  { name: 'evening', label: '初晚', time: '19:30-21:00' },
+  { name: 'night', label: '中晚', time: '21:30-22:30' },
+  { name: 'late_night', label: '深晚', time: '22:30-23:30' }
 ]
 
 const studentTabs = STUDENT_TABS
@@ -226,12 +227,13 @@ const emptyForm = (): PostForm => ({
   products: []
 })
 
-// 每位同学一份「四时段」表单数据
+// 每位同学一份「各时段」表单数据
 const emptyStudentForms = (): Record<Period, PostForm> => ({
   morning: emptyForm(),
   noon: emptyForm(),
   evening: emptyForm(),
-  night: emptyForm()
+  night: emptyForm(),
+  late_night: emptyForm()
 })
 
 const forms = reactive<Record<Student, Record<Period, PostForm>>>(
