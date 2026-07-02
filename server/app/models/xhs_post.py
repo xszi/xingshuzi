@@ -43,6 +43,8 @@ class XhsPost(db.Model):
     content = db.Column(db.Text)
     # 所挂商品：可多选，存为 JSON 数组字符串
     product = db.Column(db.Text)
+    # 是否爆文
+    is_hot = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -79,6 +81,7 @@ class XhsPost(db.Model):
             ],
             'content': self.content or '',
             'products': products,
+            'is_hot': bool(self.is_hot),
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None
         }

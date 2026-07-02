@@ -146,6 +146,7 @@ def save_post():
     post.images = images_json
     post.content = (data.get('content') or '').strip()
     post.product = products_json
+    post.is_hot = bool(data.get('is_hot', False))
 
     db.session.commit()
 

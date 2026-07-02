@@ -52,8 +52,11 @@
               class="period-panel"
             >
               <div class="post-view">
-                <div class="best-time-tip">
-                  🕐 最佳发布时间：{{ periodLabel(post.period) }} {{ periodTime(post.period) }}
+                <div class="post-view-top">
+                  <div class="best-time-tip">
+                    🕐 最佳发布时间：{{ periodLabel(post.period) }} {{ periodTime(post.period) }}
+                  </div>
+                  <span v-if="post.isHot" class="hot-badge">🔥 爆文</span>
                 </div>
 
                 <div class="view-item">
@@ -272,6 +275,7 @@ interface PostView {
   period: Period
   posterText: string
   title: string
+  isHot: boolean
   images: string[]
   content: string
   products: string[]
@@ -332,6 +336,7 @@ const emptyPostView = (student: Student, period: Period): PostView => ({
   period,
   posterText: '',
   title: '',
+  isHot: false,
   images: [],
   content: '',
   products: []
@@ -468,6 +473,7 @@ const loadWeekday = async (weekday: Weekday) => {
       period: item.period,
       posterText: item.poster_text || '',
       title: item.title || '',
+      isHot: Boolean(item.is_hot),
       images: item.images || [],
       content: item.content || '',
       products: Array.isArray(item.products) ? item.products : []
@@ -574,6 +580,30 @@ useSEO({
 }
 
 /* 最佳发布时间提示条 */
+.post-view-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.post-view-top .best-time-tip {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.hot-badge {
+  flex-shrink: 0;
+  padding: 0.35rem 0.75rem;
+  background: linear-gradient(135deg, #ff2442 0%, #ff6b35 100%);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(255, 36, 66, 0.3);
+}
+
 .best-time-tip {
   margin-bottom: 1.25rem;
   padding: 0.6rem 1rem;
