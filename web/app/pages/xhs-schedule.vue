@@ -2,7 +2,9 @@
   <div class="schedule-page">
     <div class="page-header">
       <h2 class="page-title">添加发布安排</h2>
-      <NuxtLink to="/xiaohongshu-calendar" class="back-link">查看发布日历</NuxtLink>
+      <NuxtLink :to="scheduleLink('/xiaohongshu-calendar')" class="back-link">
+        查看发布日历
+      </NuxtLink>
     </div>
 
     <el-card shadow="never" class="tip-card">
@@ -156,8 +158,7 @@ import {
 } from '~/data/xhsStudents'
 import {
   type Weekday,
-  WEEKDAY_OPTIONS,
-  getTodayWeekday
+  WEEKDAY_OPTIONS
 } from '~/utils/xhsWeekday'
 import {
   type Period,
@@ -189,9 +190,13 @@ const productOptions = ['考研', '雅思', '六级', '四级', '小学语法学
 
 const { submitPassword, rememberPassword } = useXhsSubmitPassword()
 
-const weekday = ref<Weekday>(getTodayWeekday())
-const student = ref<Student>('a')
-const period = ref<Period>('morning')
+const {
+  weekday,
+  student,
+  period,
+  scheduleLink
+} = useXhsScheduleFilters()
+
 const saving = ref(false)
 const slotLoading = ref(false)
 const uploading = ref(false)

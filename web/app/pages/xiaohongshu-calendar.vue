@@ -1,10 +1,13 @@
 <template>
   <div class="calendar-page">
-    <h2 class="page-title">发小红书安排</h2>
+    <div class="page-header">
+      <h2 class="page-title">发小红书安排</h2>
+      <NuxtLink :to="scheduleLink('/xhs-schedule')" class="add-link">添加发布安排</NuxtLink>
+    </div>
 
     <div class="week-wrapper">
       <XhsWeekdayPicker
-        :selected-weekday="selectedWeekday"
+        :selected-weekday="weekday"
         :marked-weekdays="markedWeekdays"
         @select="handleWeekdaySelect"
       />
@@ -17,7 +20,7 @@
 
       <el-tabs
         v-else
-        v-model="activeStudent"
+        v-model="student"
         type="card"
         class="student-tabs"
       >
@@ -34,7 +37,7 @@
                 :key="post.period"
                 type="button"
                 class="period-nav-item"
-                :class="{ 'is-active': activeTabByStudent[group.student] === post.period }"
+                :class="{ 'is-active': periodForStudent(group.student) === post.period }"
                 @click="selectPeriod(group.student, post.period, $event)"
               >
                 <span class="period-nav-name">{{ periodLabel(post.period) }}</span>
@@ -45,7 +48,7 @@
             <div
               v-for="post in group.posts"
               :key="'panel-' + post.period"
-              v-show="activeTabByStudent[group.student] === post.period"
+              v-show="periodForStudent(group.student) === post.period"
               class="period-panel"
             >
               <div class="post-view">
@@ -291,8 +294,9 @@ const periodOrder: Period[] = ['morning', 'noon', 'evening', 'night']
 const periodLabel = (p: string) => periodLabels[p as Period] || p
 const periodTime = (p: string) => periodTimes[p as Period] || ''
 
-const selectPeriod = (student: Student, period: Period, event?: Event) => {
-  activeTabByStudent[student] = period
+const selectPeriod = (stu: Student, p: Period, event?: Event) => {
+  student.value = stu
+  period.value = p
   const btn = event?.currentTarget as HTMLElement | undefined
   btn?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
 }
@@ -301,20 +305,35 @@ const studentOrder = STUDENT_ORDER
 
 const isMobile = useIsMobile()
 const {
-  selectedWeekday,
+  weekday,
+  student,
+  period,
   markedWeekdays,
+  scheduleLink,
   loadMarkedWeekdays
-} = useXhsWeekday()
+} = useXhsScheduleFilters()
 
-const weekdayTitle = computed(() => weekdayLabel(selectedWeekday.value))
+const weekdayTitle = computed(() => weekdayLabel(weekday.value))
 
-const activeStudent = ref<Student>('a')
-// 每位同学各自当前选中的时段标签
-const activeTabByStudent = reactive<Record<Student, Period>>(
+// 各账号在当前会话内记住上次查看的时段；URL 保存当前激活账号的时段
+const periodByStudent = reactive<Record<Student, Period>>(
   Object.fromEntries(
     STUDENT_ORDER.map((s) => [s, 'morning' as Period])
   ) as Record<Student, Period>
 )
+periodByStudent[student.value] = period.value
+
+const periodForStudent = (stu: Student) =>
+  stu === student.value ? period.value : periodByStudent[stu]
+
+watch(period, (p) => {
+  periodByStudent[student.value] = p
+})
+
+watch(student, (stu) => {
+  period.value = periodByStudent[stu] || 'morning'
+})
+
 const loading = ref(false)
 const previewVisible = ref(false)
 const previewImages = ref<string[]>([])
@@ -425,7 +444,7 @@ const onPreviewKeydown = (e: KeyboardEvent) => {
 const savePreviewImage = async () => {
   const url = previewImages.value[previewIndex.value]
   if (!url) return
-  const filename = `${selectedWeekday.value}_${previewIndex.value + 1}.${extFromImageUrl(url)}`
+  const filename = `${weekday.value}_${previewIndex.value + 1}.${extFromImageUrl(url)}`
   try {
     const result = await saveImageToDevice(url, filename)
     if (result === 'shared') {
@@ -450,8 +469,8 @@ watch(previewVisible, (visible) => {
   }
 })
 
-const handleWeekdaySelect = (weekday: Weekday) => {
-  selectedWeekday.value = weekday
+const handleWeekdaySelect = (w: Weekday) => {
+  weekday.value = w
 }
 
 const loadWeekday = async (weekday: Weekday) => {
@@ -477,8 +496,8 @@ const loadWeekday = async (weekday: Weekday) => {
   }
 }
 
-watch(selectedWeekday, (weekday) => {
-  if (weekday) loadWeekday(weekday)
+watch(weekday, (w) => {
+  if (w) loadWeekday(w)
 }, { immediate: true })
 
 onMounted(() => {
@@ -503,12 +522,36 @@ useSEO({
   animation: fadeIn 0.5s ease-in;
 }
 
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
 .page-title {
   font-size: 2.5rem;
   color: #333;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 3px solid #667eea;
+  margin: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.add-link {
+  color: #667eea;
+  text-decoration: none;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.add-link:hover {
+  text-decoration: underline;
+}
+
+.page-header + .week-wrapper {
+  margin-top: 0;
 }
 
 .calendar-wrapper,
