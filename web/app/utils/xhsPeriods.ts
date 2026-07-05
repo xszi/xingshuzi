@@ -1,4 +1,4 @@
-export type Period = 'morning' | 'noon' | 'evening' | 'night'
+export type Period = 'morning' | 'noon' | 'evening' | 'night' | 'late_night'
 
 export const PERIOD_OPTIONS: {
   value: Period
@@ -7,8 +7,9 @@ export const PERIOD_OPTIONS: {
 }[] = [
   { value: 'morning', label: '早上', time: '7:30-8:30' },
   { value: 'noon', label: '中午', time: '11:30-12:30' },
-  { value: 'evening', label: '傍晚', time: '18:30-19:30' },
-  { value: 'night', label: '晚上', time: '21:00-22:00' }
+  { value: 'evening', label: '初晚', time: '19:30-21:00' },
+  { value: 'night', label: '中晚', time: '21:30-22:30' },
+  { value: 'late_night', label: '深晚', time: '22:30-23:30' }
 ]
 
 export const periodLabel = (p: string) =>

@@ -2,7 +2,7 @@
   <div class="calendar-page">
     <div class="page-header">
       <h2 class="page-title">发小红书安排</h2>
-      <NuxtLink :to="scheduleLink('/xhs-schedule')" class="add-link">添加发布安排</NuxtLink>
+      <NuxtLink to="/xhs-schedule" class="header-link">添加发布安排</NuxtLink>
     </div>
 
     <div class="week-wrapper">
@@ -52,33 +52,11 @@
               class="period-panel"
             >
               <div class="post-view">
-                <div class="best-time-tip">
-                  🕐 最佳发布时间：{{ periodLabel(post.period) }} {{ periodTime(post.period) }}
-                </div>
-
-                <div class="view-item">
-                  <div class="view-label-row">
-                    <span class="view-label">标题</span>
-                    <el-button
-                      v-if="post.title"
-                      class="copy-btn"
-                      type="primary"
-                      size="small"
-                      plain
-                      @click="copyText(post.title, '标题')"
-                    >
-                      点击复制
-                    </el-button>
+                <div class="post-view-top">
+                  <div class="best-time-tip">
+                    🕐 最佳发布时间：{{ periodLabel(post.period) }} {{ periodTime(post.period) }}
                   </div>
-                  <p
-                    v-if="post.title"
-                    class="view-text title-text copyable"
-                    title="点击复制标题"
-                    @click="copyText(post.title, '标题')"
-                  >
-                    {{ post.title }}
-                  </p>
-                  <p v-else class="view-text view-empty-block">暂无标题</p>
+                  <span v-if="post.isHot" class="hot-badge">🔥 爆文</span>
                 </div>
 
                 <div class="view-item">
@@ -104,6 +82,31 @@
                     {{ post.posterText }}
                   </p>
                   <p v-else class="view-text view-empty-block">暂无大字报文字</p>
+                </div>
+
+                <div class="view-item">
+                  <div class="view-label-row">
+                    <span class="view-label">标题</span>
+                    <el-button
+                      v-if="post.title"
+                      class="copy-btn"
+                      type="primary"
+                      size="small"
+                      plain
+                      @click="copyText(post.title, '标题')"
+                    >
+                      点击复制
+                    </el-button>
+                  </div>
+                  <p
+                    v-if="post.title"
+                    class="view-text title-text copyable"
+                    title="点击复制标题"
+                    @click="copyText(post.title, '标题')"
+                  >
+                    {{ post.title }}
+                  </p>
+                  <p v-else class="view-text view-empty-block">暂无标题</p>
                 </div>
 
                 <div class="view-item">
@@ -264,7 +267,7 @@ definePageMeta({
   layout: 'plain'
 })
 
-type Period = 'morning' | 'noon' | 'evening' | 'night'
+type Period = 'morning' | 'noon' | 'evening' | 'night' | 'late_night'
 
 interface PostView {
   id: number
@@ -272,6 +275,7 @@ interface PostView {
   period: Period
   posterText: string
   title: string
+  isHot: boolean
   images: string[]
   content: string
   products: string[]
@@ -280,17 +284,19 @@ interface PostView {
 const periodLabels: Record<Period, string> = {
   morning: '早上',
   noon: '中午',
-  evening: '傍晚',
-  night: '晚上'
+  evening: '初晚',
+  night: '中晚',
+  late_night: '深晚'
 }
 // 各时段最佳发布时间
 const periodTimes: Record<Period, string> = {
   morning: '7:30-8:30',
   noon: '11:30-12:30',
-  evening: '18:30-19:30',
-  night: '21:00-22:00'
+  evening: '19:30-21:00',
+  night: '21:30-22:30',
+  late_night: '22:30-23:30'
 }
-const periodOrder: Period[] = ['morning', 'noon', 'evening', 'night']
+const periodOrder: Period[] = ['morning', 'noon', 'evening', 'night', 'late_night']
 const periodLabel = (p: string) => periodLabels[p as Period] || p
 const periodTime = (p: string) => periodTimes[p as Period] || ''
 
@@ -348,6 +354,7 @@ const emptyPostView = (student: Student, period: Period): PostView => ({
   period,
   posterText: '',
   title: '',
+  isHot: false,
   images: [],
   content: '',
   products: []
@@ -484,6 +491,7 @@ const loadWeekday = async (weekday: Weekday) => {
       period: item.period,
       posterText: item.poster_text || '',
       title: item.title || '',
+      isHot: Boolean(item.is_hot),
       images: item.images || [],
       content: item.content || '',
       products: Array.isArray(item.products) ? item.products : []
@@ -524,6 +532,7 @@ useSEO({
 
 .page-header {
   display: flex;
+<<<<<<< HEAD
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
@@ -552,6 +561,34 @@ useSEO({
 
 .page-header + .week-wrapper {
   margin-top: 0;
+=======
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid #667eea;
+>>>>>>> d363073bb4bb8bf7cab24f0c957ddb966f06ae4d
+}
+
+.page-title {
+  font-size: 2.5rem;
+  color: #333;
+  margin: 0;
+}
+
+.header-link {
+  color: #667eea;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-bottom: 0.35rem;
+}
+
+.header-link:hover {
+  text-decoration: underline;
 }
 
 .calendar-wrapper,
@@ -592,6 +629,30 @@ useSEO({
 }
 
 /* 最佳发布时间提示条 */
+.post-view-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.post-view-top .best-time-tip {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.hot-badge {
+  flex-shrink: 0;
+  padding: 0.35rem 0.75rem;
+  background: linear-gradient(135deg, #ff2442 0%, #ff6b35 100%);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(255, 36, 66, 0.3);
+}
+
 .best-time-tip {
   margin-bottom: 1.25rem;
   padding: 0.6rem 1rem;
@@ -949,9 +1010,17 @@ useSEO({
 
 /* 移动端适配 */
 @media (max-width: 768px) {
+  .page-header {
+    margin-bottom: 1rem;
+  }
+
   .page-title {
     font-size: 1.6rem;
-    margin-bottom: 1rem;
+  }
+
+  .header-link {
+    font-size: 0.9rem;
+    padding-bottom: 0.15rem;
   }
 
   .week-wrapper,

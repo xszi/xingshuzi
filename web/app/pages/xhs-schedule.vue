@@ -84,7 +84,22 @@
             />
           </el-form-item>
 
-          <el-form-item label="标题">
+          <el-form-item>
+            <template #label>
+              <div class="title-label-row">
+                <span>标题</span>
+                <span class="hot-inline">
+                  <span class="hot-inline-text">是否爆文</span>
+                  <el-switch
+                    v-model="form.isHot"
+                    active-text="爆文"
+                    inactive-text="普通"
+                    inline-prompt
+                    style="--el-switch-on-color: #ff2442"
+                  />
+                </span>
+              </div>
+            </template>
             <el-input
               v-model="form.title"
               type="textarea"
@@ -177,6 +192,7 @@ definePageMeta({
 
 // 提交页禁止聚焦放大，避免 iOS 自动缩放后出现横向滚动
 useHead({
+  title: '小红书收集',
   meta: [
     {
       key: 'viewport',
@@ -205,6 +221,7 @@ interface FormState {
   id: number | null
   posterText: string
   title: string
+  isHot: boolean
   images: string[]
   content: string
   products: string[]
@@ -214,6 +231,7 @@ const emptyForm = (): FormState => ({
   id: null,
   posterText: '',
   title: '',
+  isHot: false,
   images: [],
   content: '',
   products: []
@@ -239,6 +257,7 @@ const applyPost = (item: any) => {
     id: item.id,
     posterText: item.poster_text || '',
     title: item.title || '',
+    isHot: Boolean(item.is_hot),
     images: Array.isArray(item.images) ? [...item.images] : [],
     content: item.content || '',
     products: rawProducts.filter((x: string) => productOptions.includes(x))
@@ -319,6 +338,7 @@ const handleSubmit = async () => {
       period: period.value,
       poster_text: form.posterText,
       title: form.title,
+      is_hot: form.isHot,
       images: form.images,
       content: form.content,
       products: form.products,
@@ -443,6 +463,27 @@ const handleSubmit = async () => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 1rem;
+}
+
+/* 标题标签与「是否爆文」开关同一行 */
+.title-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.hot-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hot-inline-text {
+  font-size: 0.85rem;
+  color: #909399;
+  font-weight: normal;
 }
 
 .form-actions {
