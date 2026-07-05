@@ -532,43 +532,12 @@ useSEO({
 
 .page-header {
   display: flex;
-<<<<<<< HEAD
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-}
-
-.page-title {
-  font-size: 2.5rem;
-  color: #333;
-  margin: 0;
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.add-link {
-  color: #667eea;
-  text-decoration: none;
-  font-size: 0.95rem;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.add-link:hover {
-  text-decoration: underline;
-}
-
-.page-header + .week-wrapper {
-  margin-top: 0;
-=======
   align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 3px solid #667eea;
->>>>>>> d363073bb4bb8bf7cab24f0c957ddb966f06ae4d
 }
 
 .page-title {
