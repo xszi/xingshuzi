@@ -53,7 +53,7 @@
     
     <footer class="footer" role="contentinfo">
       <div class="footer-content">
-        <p>&copy; 2025 行书子. All rights reserved.</p>
+        <p>&copy; 2026 行书子. All rights reserved.</p>
       </div>
     </footer>
   </div>

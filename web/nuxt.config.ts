@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: '2026-07-15',
   devtools: { enabled: true },
 
   // 确保服务端渲染（SSR）模式
